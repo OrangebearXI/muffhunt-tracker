@@ -361,9 +361,10 @@ async function githubWrite(runs, msg) {
 // ─── Text report parser ───────────────────────────────────────────────────
 function parseDur(s) {
   if (!s) return null;
-  const ms = s.match(/(\d+)\s*m(?:in)?\s*(\d+)\s*s/i); if (ms) return +ms[1]*60+ +ms[2];
-  const so = s.match(/^(\d+)\s*s(?:ec)?$/i);            if (so) return +so[1];
-  const n  = s.match(/^(\d+)$/);                        if (n)  return +n[1];
+  // "5 min 6 sec", "0 min 27 sec", "1m6s", "27s"
+  const ms = s.match(/(\d+)\s*m(?:in)?\s*(\d+)\s*s(?:ec)?/i); if (ms) return +ms[1]*60+ +ms[2];
+  const so = s.match(/^(\d+)\s*s(?:ec)?$/i);                   if (so) return +so[1];
+  const n  = s.match(/^(\d+)$/);                               if (n)  return +n[1];
   return null;
 }
 
@@ -398,7 +399,7 @@ function parseReport(text) {
   const gm = lines[0].match(/\[(MAIN|BABY)\]/i);
   if (gm) run.group = gm[1].toLowerCase();
 
-  let sec='', boss=null, inDmg=false, inWs=false, inAtp=false;
+  let sec='', boss=null, inDmg=false, inWs=false, inAtp=false, inBossSection=false;
 
   for (let i=1; i<lines.length; i++) {
     const ln = lines[i], lo = ln.toLowerCase();
@@ -411,7 +412,7 @@ function parseReport(text) {
     if (ln.startsWith('Mesos obtained:'))     { run.meso_count    = parseInt(ln.replace(/[^\d]/g,''))||0; continue; }
 
     // Section headers
-    if (lo.includes('defeated bosses')  || lo.includes('boss damage breakdown')) { sec='bosses'; boss=null; continue; }
+    if (lo.includes('defeated bosses')  || lo.includes('boss damage breakdown')) { sec='bosses'; boss=null; inBossSection=true; continue; }
     if (lo.includes('bonus objectives') || lo==='[bonus objectives]')            { sec='bonus'; continue; }
     if (lo.includes('party composition')|| ln==='[Party]')                       { sec='party'; continue; }
     if (ln==='[COR Rolls]')                                                       { sec='rolls'; continue; }
@@ -419,15 +420,18 @@ function parseReport(text) {
     if (lo.includes('extra notes')      || ln==='[Notes]')                       { sec='notes'; continue; }
     if (ln==='[Absorb-TP]')                                                       { sec='atp'; inAtp=true; continue; }
 
-    // Boss section entry (e.g. [Ghatjot])
-    if (sec==='bosses') {
+    // Boss section entry (e.g. [Ghatjot]).
+    // Checked against inBossSection rather than sec==='bosses' because subsections
+    // like [COR Rolls] change sec and would otherwise cause all subsequent boss
+    // headers to be silently skipped. Reset sec to 'bosses' on each new boss.
+    if (inBossSection) {
       const bm = ln.match(/^\[([A-Z][a-z]+)\]$/);
       if (bm && BOSSES.includes(bm[1])) {
         boss=bm[1]; run.bosses[boss].killed=true;
         if (!run.bosses_killed.includes(boss)) run.bosses_killed.push(boss);
         inDmg=false; inWs=false; inAtp=false; sec='bosses'; continue;
       }
-      // Old MuffinMan format: bare boss names in defeated bosses section
+      // Old MuffinMan format: bare boss names in the defeated bosses section
       if (isMM && !boss && BOSSES.includes(ln)) {
         run.bosses[ln].killed=true;
         if (!run.bosses_killed.includes(ln)) run.bosses_killed.push(ln);
