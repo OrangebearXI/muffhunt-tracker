@@ -207,6 +207,683 @@
           "players": {}
         }
       }
+    },
+    {
+      "id": "2026-05-09_23-59-37",
+      "date": "Sat May  9 23:59:37 2026",
+      "timestamp": 1778367577,
+      "group": "main",
+      "gallimaufry": 86482,
+      "old_case_plus1": 15,
+      "hard_mode": false,
+      "meso_count": 0,
+      "note": null,
+      "party": [
+        {
+          "name": "Uzuke",
+          "job": "0??/0??"
+        },
+        {
+          "name": "Krosiz",
+          "job": "0??/0??"
+        },
+        {
+          "name": "Combatjack",
+          "job": "GEO99/DRK57"
+        },
+        {
+          "name": "Thaum",
+          "job": "BRD99/DRK59"
+        },
+        {
+          "name": "Escanor",
+          "job": "0??/0??"
+        },
+        {
+          "name": "Obr",
+          "job": "RDM99/DRK59"
+        }
+      ],
+      "bonus": {
+        "aurum_chest": true,
+        "naakuals": 1,
+        "mini_nms": []
+      },
+      "shards": {
+        "A": {
+          "obtained": false,
+          "inzone": null
+        },
+        "B": {
+          "obtained": false,
+          "inzone": null
+        },
+        "C": {
+          "obtained": false,
+          "inzone": null
+        },
+        "D": {
+          "obtained": false,
+          "inzone": null
+        },
+        "E": {
+          "obtained": false,
+          "inzone": null
+        },
+        "F": {
+          "obtained": false,
+          "inzone": null
+        },
+        "G": {
+          "obtained": false,
+          "inzone": null
+        },
+        "H": {
+          "obtained": false,
+          "inzone": null
+        }
+      },
+      "metals": {
+        "A": {
+          "obtained": false,
+          "inzone": null
+        },
+        "B": {
+          "obtained": false,
+          "inzone": null
+        },
+        "C": {
+          "obtained": false,
+          "inzone": null
+        },
+        "D": {
+          "obtained": false,
+          "inzone": null
+        },
+        "E": {
+          "obtained": false,
+          "inzone": null
+        },
+        "F": {
+          "obtained": false,
+          "inzone": null
+        },
+        "G": {
+          "obtained": false,
+          "inzone": null
+        },
+        "H": {
+          "obtained": false,
+          "inzone": null
+        }
+      },
+      "bosses_killed": [
+        "Ghatjot",
+        "Leshonn",
+        "Skomora",
+        "Degei",
+        "Dhartok",
+        "Gartell",
+        "Triboulex",
+        "Aita",
+        "Aminon"
+      ],
+      "bosses": {
+        "Ghatjot": {
+          "killed": true,
+          "fight_duration": 29,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Krosiz": {
+              "damage": 285933,
+              "pct": 88,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 247388,
+              "pct": 73,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Escanor": {
+              "damage": 225313,
+              "pct": 70,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 56408,
+              "pct": 36,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 1509,
+              "pct": 0.2,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Uzuke": {
+              "damage": 592,
+              "pct": 0.1,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Leshonn": {
+          "killed": true,
+          "fight_duration": 30,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Krosiz": {
+              "damage": 269227,
+              "pct": 82,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 233993,
+              "pct": 51,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Escanor": {
+              "damage": 157543,
+              "pct": 48,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 150328,
+              "pct": 42,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 87174,
+              "pct": 34,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Uzuke": {
+              "damage": 414,
+              "pct": 0,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Skomora": {
+          "killed": true,
+          "fight_duration": 27,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Krosiz": {
+              "damage": 299853,
+              "pct": 91,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 239480,
+              "pct": 73,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Escanor": {
+              "damage": 161185,
+              "pct": 73,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 98772,
+              "pct": 40,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 67333,
+              "pct": 52,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Uzuke": {
+              "damage": 574,
+              "pct": 0.1,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Degei": {
+          "killed": true,
+          "fight_duration": 36,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Krosiz": {
+              "damage": 369871,
+              "pct": 85,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 269228,
+              "pct": 59,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Escanor": {
+              "damage": 187383,
+              "pct": 58,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 115237,
+              "pct": 32,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Uzuke": {
+              "damage": 530,
+              "pct": 0.1,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Dhartok": {
+          "killed": true,
+          "fight_duration": 58,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Krosiz": {
+              "damage": 517920,
+              "pct": 66,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 368719,
+              "pct": 53,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Escanor": {
+              "damage": 356302,
+              "pct": 65,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 151826,
+              "pct": 39,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 127454,
+              "pct": 50,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Gartell": {
+          "killed": true,
+          "fight_duration": 64,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Krosiz": {
+              "damage": 427996,
+              "pct": 41,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 341253,
+              "pct": 61,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Escanor": {
+              "damage": 318516,
+              "pct": 41,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 293003,
+              "pct": 36,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 132250,
+              "pct": 35,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Triboulex": {
+          "killed": true,
+          "fight_duration": 45,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Krosiz": {
+              "damage": 424156,
+              "pct": 95,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 372502,
+              "pct": 56,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Escanor": {
+              "damage": 353455,
+              "pct": 81,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 333029,
+              "pct": 49,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 165665,
+              "pct": 47,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Aita": {
+          "killed": true,
+          "fight_duration": 53,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Krosiz": {
+              "damage": 594157,
+              "pct": 88,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 395129,
+              "pct": 48,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 373968,
+              "pct": 79,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 162907,
+              "pct": 43,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Escanor": {
+              "damage": 128146,
+              "pct": 56,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Aminon": {
+          "killed": true,
+          "fight_duration": 438,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": {
+            "misers": 8,
+            "misers_lucky": false,
+            "tacticians": 5,
+            "tacticians_lucky": true,
+            "wildcard": 6
+          },
+          "players": {
+            "Krosiz": {
+              "damage": 2387428,
+              "pct": 88,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Escanor": {
+              "damage": 962270,
+              "pct": 41,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 803603,
+              "pct": 66,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 569137,
+              "pct": 35,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 444379,
+              "pct": 37,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Uzuke": {
+              "damage": 262963,
+              "pct": 26,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          },
+          "absorb_tp": {
+            "Obr": {
+              "success": 35,
+              "zero_tp": 0,
+              "resist": 0,
+              "avg_tp": 135
+            },
+            "Thaum": {
+              "success": 28,
+              "zero_tp": 0,
+              "resist": 0,
+              "avg_tp": 152
+            },
+            "Escanor": {
+              "success": 25,
+              "zero_tp": 0,
+              "resist": 0,
+              "avg_tp": 152
+            },
+            "Combatjack": {
+              "success": 24,
+              "zero_tp": 0,
+              "resist": 1,
+              "avg_tp": 162
+            }
+          }
+        }
+      }
     }
   ]
 }
