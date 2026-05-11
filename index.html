@@ -184,7 +184,7 @@ body { font-family: var(--font); background: var(--page-bg); color: var(--text-1
     <div class="logo-mark">MH</div>
     <div>
       <div class="logo-name">MuffHunt</div>
-      <div class="logo-sub">OrangebearXI · Sortie Tracker</div>
+      <div class="logo-sub">OrangebearXI · Fenrir · Sortie Tracker</div>
     </div>
   </div>
   <div class="hdr-right">
@@ -263,16 +263,24 @@ body { font-family: var(--font); background: var(--page-bg); color: var(--text-1
 
 <!-- Import modal -->
 <div class="overlay" id="mo-import">
-  <div class="modal">
-    <div class="modal-ttl">Import historical run</div>
-    <div class="modal-sub">Paste the full contents of a MuffinMan or MuffHunt text report. Fields not present in older formats are left blank. A GitHub token is required to save.</div>
-    <label class="modal-lbl">Report text</label>
-    <textarea class="modal-ta" id="import-ta" placeholder="Paste report text here…"></textarea>
-    <div id="import-preview" style="display:none" class="import-preview"></div>
+  <div class="modal" style="width:600px">
+    <div class="modal-ttl">Import runs</div>
+    <div class="modal-sub">Select one or more <code style="font-size:11px;background:#f5f2ec;padding:1px 5px;border-radius:3px">.txt</code> report files. MuffinMan and MuffHunt formats are both supported. A GitHub token is required to save.</div>
+    <label class="modal-lbl">Report files</label>
+    <div id="drop-zone" style="border:1.5px dashed var(--border);border-radius:var(--r-md);padding:20px;text-align:center;cursor:pointer;margin-bottom:12px;background:#faf8f4;transition:border-color .15s" onclick="$('file-inp').click()" ondragover="event.preventDefault();this.style.borderColor='var(--gold)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="handleDrop(event)">
+      <div style="font-size:13px;color:var(--text-2);margin-bottom:4px">Click to choose files or drag and drop here</div>
+      <div style="font-size:11px;color:var(--text-3)">sortie_YYYY-MM-DD_HH-MM-SS.txt · multiple files supported</div>
+    </div>
+    <input type="file" id="file-inp" accept=".txt" multiple style="display:none" onchange="handleFiles(this.files)">
+    <div id="import-preview" style="display:none;margin-bottom:12px">
+      <table class="tbl" style="font-size:11.5px">
+        <thead><tr><th>File</th><th>Date</th><th>Group</th><th>Bosses</th><th>Galli</th><th>Status</th></tr></thead>
+        <tbody id="import-rows"></tbody>
+      </table>
+    </div>
     <div class="modal-btns">
       <button class="btn" onclick="closeImport()">Cancel</button>
-      <button class="btn" onclick="previewImport()">Preview</button>
-      <button class="btn btn-gold" id="import-ok" style="display:none" onclick="confirmImport()">Import run</button>
+      <button class="btn btn-gold" id="import-ok" style="display:none" onclick="confirmImport()">Import</button>
     </div>
   </div>
 </div>
@@ -314,7 +322,6 @@ let selectedRun   = null;
 let activeBoss    = 'Aminon';
 let galliChart    = null;
 let pendingDelete = null;
-let pendingImport = null;
 
 // ─── Utils ────────────────────────────────────────────────────────────────
 const $   = id => document.getElementById(id);
@@ -938,29 +945,124 @@ async function confirmDelete() {
 }
 
 // ─── Import ───────────────────────────────────────────────────────────────
-function openImport()  { $('mo-import').classList.add('open'); }
+let pendingImports = [];  // array of parsed run objects ready to save
+
+function openImport() {
+  pendingImports = [];
+  $('import-rows').innerHTML = '';
+  $('import-preview').style.display = 'none';
+  $('import-ok').style.display = 'none';
+  $('file-inp').value = '';
+  $('mo-import').classList.add('open');
+}
+
 function closeImport() {
   $('mo-import').classList.remove('open');
-  $('import-ta').value=''; $('import-preview').style.display='none';
-  $('import-ok').style.display='none'; pendingImport=null;
+  pendingImports = [];
 }
-function previewImport() {
-  const text=$('import-ta').value.trim();
-  if (!text) { toast('Paste a report first.', true); return; }
-  const run=parseReport(text);
-  if (!run) { toast('Could not parse this report format.', true); return; }
-  pendingImport=run;
-  const party=run.party.map(p=>p.name).join(', ')||'Unknown';
-  $('import-preview').textContent=`Date:         ${run.date}\nGroup:        ${run.group}\nBosses:       ${run.bosses_killed.length}/9  (${run.bosses_killed.join(', ')||'none'})\nGallimaufry:  ${comma(run.gallimaufry)}\nOld Case +1:  ${run.old_case_plus1}\nParty:        ${party}`;
-  $('import-preview').style.display=''; $('import-ok').style.display='';
+
+function handleDrop(e) {
+  e.preventDefault();
+  $('drop-zone').style.borderColor = 'var(--border)';
+  const files = [...e.dataTransfer.files].filter(f => f.name.endsWith('.txt'));
+  if (!files.length) { toast('Drop .txt files only.', true); return; }
+  processFiles(files);
 }
+
+function handleFiles(fileList) {
+  const files = [...fileList];
+  if (!files.length) return;
+  processFiles(files);
+}
+
+function processFiles(files) {
+  // Read all files in parallel then build preview table
+  let done = 0;
+  const results = new Array(files.length);
+
+  files.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const text = e.target.result;
+      const run  = parseReport(text);
+      const dup  = run && allRuns.some(r => r.id === run.id);
+      results[i] = { file: file.name, run, dup };
+      done++;
+      if (done === files.length) renderImportPreview(results);
+    };
+    reader.readAsText(file);
+  });
+}
+
+function renderImportPreview(results) {
+  // Sort by timestamp so preview matches the order they'll be inserted
+  results.sort((a, b) => (b.run?.timestamp||0) - (a.run?.timestamp||0));
+
+  pendingImports = [];
+  let rows = '';
+  let importCount = 0;
+
+  results.forEach(({ file, run, dup }) => {
+    let status, rowStyle = '';
+    if (!run) {
+      status = '<span style="color:var(--coral)">Could not parse</span>';
+      rowStyle = 'opacity:.5';
+    } else if (dup) {
+      status = '<span style="color:#aaa">Duplicate — skipped</span>';
+      rowStyle = 'opacity:.5';
+    } else {
+      status = '<span style="color:var(--teal);font-weight:500">Ready</span>';
+      pendingImports.push(run);
+      importCount++;
+    }
+
+    const bosses = run ? `${run.bosses_killed.length}/9` : '—';
+    const galli  = run ? comma(run.gallimaufry) : '—';
+    const date   = run ? run.date : '—';
+    const grp    = run ? run.group : '—';
+    const fname  = file.length > 32 ? '…'+file.slice(-28) : file;
+
+    rows += `<tr style="${rowStyle}">
+      <td style="font-size:10.5px;color:var(--text-3);font-family:monospace">${fname}</td>
+      <td style="white-space:nowrap">${date}</td>
+      <td>${grp}</td>
+      <td>${bosses}</td>
+      <td class="num">${galli}</td>
+      <td>${status}</td>
+    </tr>`;
+  });
+
+  $('import-rows').innerHTML = rows;
+  $('import-preview').style.display = '';
+  $('import-ok').style.display = importCount ? '' : 'none';
+  $('import-ok').textContent = importCount === 1
+    ? 'Import 1 run'
+    : `Import ${importCount} runs`;
+}
+
 async function confirmImport() {
-  if (!pendingImport) return;
-  if (allRuns.find(r=>r.id===pendingImport.id)) { toast('A run with this date already exists.', true); return; }
-  const newRuns=[pendingImport,...allRuns].sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
-  const ok=await githubWrite(newRuns,'Import run '+pendingImport.id);
-  if (ok) { allRuns=newRuns; closeImport(); renderAll(); toast('Run imported.'); }
-  else { toast('Import failed. Check your token in Settings.', true); }
+  if (!pendingImports.length) return;
+  $('import-ok').disabled = true;
+  $('import-ok').textContent = 'Saving…';
+
+  // Merge with existing runs, deduplicate by id, sort newest first
+  const merged = [...pendingImports, ...allRuns]
+    .filter((r, i, arr) => arr.findIndex(x => x.id === r.id) === i)
+    .sort((a, b) => (b.timestamp||0) - (a.timestamp||0));
+
+  const ok = await githubWrite(merged, `Import ${pendingImports.length} run(s)`);
+  $('import-ok').disabled = false;
+
+  if (ok) {
+    const n = pendingImports.length;
+    allRuns = merged;
+    closeImport();
+    renderAll();
+    toast(`${n} run${n>1?'s':''} imported.`);
+  } else {
+    $('import-ok').textContent = `Import ${pendingImports.length} runs`;
+    toast('Import failed. Check your token in Settings.', true);
+  }
 }
 
 // ─── Settings ─────────────────────────────────────────────────────────────
