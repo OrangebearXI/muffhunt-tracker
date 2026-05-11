@@ -1,3 +1,559 @@
 {
-  "runs": []
+  "runs": [
+    {
+      "id": "2026-05-10_21-27-00",
+      "date": "Sun May 10 21:27:00 2026",
+      "timestamp": 1778444820,
+      "group": "main",
+      "gallimaufry": 55913,
+      "old_case_plus1": 0,
+      "hard_mode": false,
+      "meso_count": 0,
+      "note": null,
+      "party": [
+        {
+          "name": "Combatjack",
+          "job": "0??/0??"
+        },
+        {
+          "name": "Jaquie",
+          "job": "WAR99/DRG58"
+        },
+        {
+          "name": "Uzuke",
+          "job": "0??/0??"
+        },
+        {
+          "name": "Thaum",
+          "job": "BRD99/DNC59"
+        },
+        {
+          "name": "Obr",
+          "job": "RDM99/NIN59"
+        },
+        {
+          "name": "Escanor",
+          "job": "0??/0??"
+        }
+      ],
+      "bonus": {
+        "aurum_chest": true,
+        "naakuals": 1,
+        "mini_nms": [
+          "Botulus"
+        ]
+      },
+      "shards": {
+        "A": {
+          "obtained": false,
+          "inzone": null
+        },
+        "B": {
+          "obtained": false,
+          "inzone": null
+        },
+        "C": {
+          "obtained": false,
+          "inzone": null
+        },
+        "D": {
+          "obtained": false,
+          "inzone": null
+        },
+        "E": {
+          "obtained": false,
+          "inzone": null
+        },
+        "F": {
+          "obtained": false,
+          "inzone": null
+        },
+        "G": {
+          "obtained": false,
+          "inzone": null
+        },
+        "H": {
+          "obtained": false,
+          "inzone": null
+        }
+      },
+      "metals": {
+        "A": {
+          "obtained": false,
+          "inzone": null
+        },
+        "B": {
+          "obtained": false,
+          "inzone": null
+        },
+        "C": {
+          "obtained": false,
+          "inzone": null
+        },
+        "D": {
+          "obtained": false,
+          "inzone": null
+        },
+        "E": {
+          "obtained": false,
+          "inzone": null
+        },
+        "F": {
+          "obtained": false,
+          "inzone": null
+        },
+        "G": {
+          "obtained": false,
+          "inzone": null
+        },
+        "H": {
+          "obtained": false,
+          "inzone": null
+        }
+      },
+      "bosses_killed": [
+        "Ghatjot",
+        "Leshonn",
+        "Skomora",
+        "Degei",
+        "Dhartok",
+        "Gartell",
+        "Triboulex",
+        "Aita"
+      ],
+      "bosses": {
+        "Ghatjot": {
+          "killed": true,
+          "fight_duration": 22,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Obr": {
+              "damage": 269619,
+              "pct": 64,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Jaquie": {
+              "damage": 192758,
+              "pct": 87,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Escanor": {
+              "damage": 180634,
+              "pct": 75,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 81046,
+              "pct": 71,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 65191,
+              "pct": 60,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Leshonn": {
+          "killed": true,
+          "fight_duration": 29,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Escanor": {
+              "damage": 228158,
+              "pct": 89,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 215666,
+              "pct": 66,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Jaquie": {
+              "damage": 192907,
+              "pct": 86,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 64286,
+              "pct": 51,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 61466,
+              "pct": 58,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Skomora": {
+          "killed": true,
+          "fight_duration": 26,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Jaquie": {
+              "damage": 275651,
+              "pct": 85,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Escanor": {
+              "damage": 265722,
+              "pct": 71,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 151828,
+              "pct": 47,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 57829,
+              "pct": 47,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 49675,
+              "pct": 43,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Degei": {
+          "killed": true,
+          "fight_duration": 34,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Jaquie": {
+              "damage": 386401,
+              "pct": 72,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Escanor": {
+              "damage": 293218,
+              "pct": 44,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 138896,
+              "pct": 41,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 96277,
+              "pct": 43,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Dhartok": {
+          "killed": true,
+          "fight_duration": 72,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Escanor": {
+              "damage": 557973,
+              "pct": 54,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Jaquie": {
+              "damage": 381863,
+              "pct": 42,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 344804,
+              "pct": 40,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 128099,
+              "pct": 34,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 121768,
+              "pct": 36,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Gartell": {
+          "killed": true,
+          "fight_duration": 48,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Jaquie": {
+              "damage": 471877,
+              "pct": 86,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Escanor": {
+              "damage": 391799,
+              "pct": 53,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 379684,
+              "pct": 59,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 254504,
+              "pct": 48,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 151526,
+              "pct": 44,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Triboulex": {
+          "killed": true,
+          "fight_duration": 55,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Escanor": {
+              "damage": 459041,
+              "pct": 61,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Jaquie": {
+              "damage": 429945,
+              "pct": 63,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 297337,
+              "pct": 46,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 193278,
+              "pct": 36,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 105129,
+              "pct": 42,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Aita": {
+          "killed": true,
+          "fight_duration": 39,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {
+            "Escanor": {
+              "damage": 588411,
+              "pct": 88,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Jaquie": {
+              "damage": 321124,
+              "pct": 71,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Obr": {
+              "damage": 293576,
+              "pct": 68,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Thaum": {
+              "damage": 253969,
+              "pct": 59,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            },
+            "Combatjack": {
+              "damage": 158704,
+              "pct": 70,
+              "ws_avg": 0,
+              "ws_count": 0,
+              "ws_acc": 0,
+              "m_acc": 0,
+              "swings": 0
+            }
+          }
+        },
+        "Aminon": {
+          "killed": false,
+          "fight_duration": null,
+          "inzone_at_start": null,
+          "deaths": [],
+          "rolls": null,
+          "players": {}
+        }
+      }
+    }
+  ]
 }
