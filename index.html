@@ -406,8 +406,8 @@ function parseReport(text) {
     if (ln==='-----------------------------') { inDmg=false; inWs=false; inAtp=false; continue; }
 
     // Top-level fields
-    if (ln.startsWith('Total Gallimaufry:'))  { run.gallimaufry   = parseInt(ln.replace(/[^\d]/g,''))||0; continue; }
-    if (ln.startsWith('Total Old Case +1:'))  { run.old_case_plus1= parseInt(ln.replace(/[^\d]/g,''))||0; continue; }
+    if (ln.startsWith('Total Gallimaufry:'))  { run.gallimaufry   = parseInt((ln.split(':')[1]||'').replace(/[^\d]/g,''))||0; continue; }
+    if (ln.startsWith('Total Old Case +1:'))  { run.old_case_plus1= parseInt((ln.split(':')[1]||'').replace(/[^\d]/g,''))||0; continue; }
     if (ln==='Hard Mode')                     { run.hard_mode=true; continue; }
     if (ln.startsWith('Mesos obtained:'))     { run.meso_count    = parseInt(ln.replace(/[^\d]/g,''))||0; continue; }
 
