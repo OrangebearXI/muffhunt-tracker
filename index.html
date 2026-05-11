@@ -15,10 +15,10 @@
   --teal-bg:    #E1F5EE;
   --coral:      #D85A30;
   --coral-bg:   #FAECE7;
-  --page-bg:    #f4f2ee;
+  --page-bg:    #dedad1;
   --card-bg:    #ffffff;
-  --border:     #e8e3d8;
-  --border-2:   #d8d3c8;
+  --border:     #dedad1;
+  --border-2:   #ccc8be;
   --text-1:     #1c1a16;
   --text-2:     #6b6558;
   --text-3:     #a09890;
@@ -50,7 +50,7 @@ body { font-family: var(--font); background: var(--page-bg); color: var(--text-1
 
 /* ── Stats ── */
 .stats { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 14px; }
-.stat { background: white; border-radius: var(--r-md); border: 1px solid var(--border); padding: 12px 13px; }
+.stat { background: white; border-radius: var(--r-md); border: 1px solid var(--border-2); padding: 12px 13px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
 .stat-lbl { font-size: 10px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
 .stat-val { font-size: 22px; font-weight: 600; letter-spacing: -.5px; color: var(--text-1); line-height: 1; }
 .stat-sub { font-size: 10.5px; color: var(--text-3); margin-top: 3px; }
@@ -60,7 +60,7 @@ body { font-family: var(--font); background: var(--page-bg); color: var(--text-1
 .stat.coral .stat-val { color: var(--coral); }
 
 /* ── Cards ── */
-.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; margin-bottom: 12px; }
+.card { background: var(--card-bg); border: 1px solid var(--border-2); border-radius: var(--r-lg); overflow: hidden; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
 .card-hdr { padding: 11px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: white; }
 .card-ttl { font-size: 10.5px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; }
 .card-meta { font-size: 10.5px; color: var(--text-3); }
@@ -127,7 +127,7 @@ body { font-family: var(--font); background: var(--page-bg); color: var(--text-1
 
 /* ── Boss time grid ── */
 .boss-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
-.bt-card { background: white; border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; }
+.bt-card { background: white; border: 1px solid var(--border-2); border-radius: var(--r-md); padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
 .bt-name { font-size: 10px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 9px; }
 .bt-row  { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
 .btl { font-size: 9px; color: var(--text-3); margin-bottom: 1px; }
@@ -220,7 +220,7 @@ body { font-family: var(--font); background: var(--page-bg); color: var(--text-1
 </div>
 
 <!-- Player averages -->
-<div class="sec-lbl">Player averages by boss</div>
+<div class="sec-lbl">Fight breakdown by boss</div>
 <div class="card">
   <div class="boss-tabs" id="boss-tabs"></div>
   <div id="pavg-body"></div>
@@ -758,7 +758,7 @@ function renderDetail(run) {
   </div>`;
 }
 
-// ─── Render: player averages ──────────────────────────────────────────────
+// ─── Render: fight breakdown by boss ─────────────────────────────────────
 function renderBossTabs() {
   const runs = filtered();
   $('boss-tabs').innerHTML = BOSSES.map(b =>
@@ -768,79 +768,61 @@ function renderBossTabs() {
     bt.addEventListener('click', () => { activeBoss=bt.dataset.b; renderBossTabs(); });
   });
 
-  const avgRows = playerBossAvg(runs, activeBoss);
-  if (!avgRows.length) { $('pavg-body').innerHTML='<div class="empty">No 9-boss run data for this boss yet.</div>'; return; }
-
-  // Build avg lookup by player name
-  const avgByName = {};
-  avgRows.forEach(r => { avgByName[r.name] = r; });
-
-  // Get selected run stats for this boss (if run is selected and boss was killed)
+  // Selected run data for this boss
   const selBossData = selectedRun?.bosses?.[activeBoss];
-  const selPlayers  = (selBossData?.killed && selBossData?.players) ? selBossData.players : null;
+  const selPlayers  = selBossData?.killed ? (selBossData.players || {}) : null;
 
-  // All players: union of historical avg players and current run players
-  const allNames = new Set(Object.keys(avgByName));
-  if (selPlayers) Object.keys(selPlayers).forEach(n => allNames.add(n));
+  if (selPlayers && Object.keys(selPlayers).length) {
+    // ── Selected run: show that specific fight ─────────────────────────────
+    const total = Object.values(selPlayers).reduce((s,p) => s+(p.damage||0), 0);
 
-  // Sort: by avg pct desc, then by run pct desc for new players
-  const sorted = [...allNames].sort((a,b) => {
-    const ap = avgByName[a]?.pct ?? (selPlayers?.[a]?.pct ?? 0);
-    const bp = avgByName[b]?.pct ?? (selPlayers?.[b]?.pct ?? 0);
-    return bp - ap;
-  });
+    // Sort by damage desc
+    const sorted = Object.entries(selPlayers).sort((a,b)=>(b[1].damage||0)-(a[1].damage||0));
 
-  const fmtWs = v => v != null && v > 0 ? (v >= 1000 ? Math.round(v/1000)+'k' : Math.round(v)) : '—';
-  const fmtPct = v => v != null && v > 0 ? v.toFixed(1)+'%' : '—';
+    const fmtDmg = v => v >= 1000000 ? (v/1000000).toFixed(2)+'m' : v >= 1000 ? Math.floor(v/1000)+'k' : String(v);
+    const fmtWs  = v => v > 0 ? (v >= 1000 ? Math.round(v/1000)+'k' : Math.round(v)) : '—';
+    const fmtPct = v => v > 0 ? v.toFixed(1)+'%' : '—';
 
-  const hasSelected = !!selPlayers;
-  const selDate = selectedRun?.date ? selectedRun.date.split(' ').slice(1,3).join(' ') : 'This run';
+    const selDate = selectedRun.date.split(' ').slice(0,4).join(' ');
+    let h = `<div style="padding:7px 14px 6px;font-size:10.5px;color:var(--text-3);border-bottom:1px solid var(--border)">${selDate} · ${activeBoss}</div>`;
+    h += `<table class="tbl"><thead><tr>
+      <th>Player</th><th>%</th><th>Total dmg</th><th>Acc</th><th>Swings</th><th>WS avg</th><th>WS #</th>
+    </tr></thead><tbody>`;
 
-  let h = `<table class="tbl"><thead><tr>
-    <th>Player</th>`;
-  if (hasSelected) h += `<th>${selDate} dmg%</th><th>Avg dmg%</th><th>${selDate} WS</th><th>Avg WS</th><th>${selDate} acc</th><th>Avg acc</th>`;
-  else             h += `<th>Avg dmg%</th><th>Avg WS</th><th>Avg acc</th>`;
-  h += `</tr></thead><tbody>`;
-
-  sorted.forEach((n, i) => {
-    const avg = avgByName[n];
-    const sel = selPlayers?.[n];
-    const isTop = i === 0;
-    const gs = isTop ? 'style="color:var(--gold);font-weight:500"' : '';
-
-    if (hasSelected) {
-      const inSel = !!sel;
-      const inAvg = !!avg;
-      // Delta indicators for dmg%
-      let dPct='', dWs='', dAcc='';
-      if (sel && avg) {
-        const dp = (sel.pct||0) - (avg.pct||0);
-        dPct = Math.abs(dp)>0.5 ? ` <span style="font-size:9.5px;color:${dp>0?'var(--teal)':'var(--coral)'}">${dp>0?'▲':'▼'}${Math.abs(dp).toFixed(1)}</span>` : '';
-        const dw = (sel.ws_avg||0) - (avg.ws||0);
-        dWs  = Math.abs(dw)>100 ? ` <span style="font-size:9.5px;color:${dw>0?'var(--teal)':'var(--coral)'}">${dw>0?'▲':'▼'}${fmtWs(Math.abs(dw))}</span>` : '';
-        const da = (sel.m_acc||0) - (avg.acc||0);
-        dAcc = Math.abs(da)>0.5 ? ` <span style="font-size:9.5px;color:${da>0?'var(--teal)':'var(--coral)'}">${da>0?'▲':'▼'}${Math.abs(da).toFixed(1)}%</span>` : '';
-      }
-      h += `<tr>
-        <td ${gs}>${n}${!inSel?` <span style="font-size:9.5px;color:#ccc">absent</span>`:''}</td>
-        <td>${inSel?fmtPct(sel.pct):'<span style="color:#ccc">—</span>'}${dPct}</td>
-        <td ${gs}>${inAvg?fmtPct(avg.pct):'<span style="color:#ccc">new</span>'}</td>
-        <td>${inSel?fmtWs(sel.ws_avg):'<span style="color:#ccc">—</span>'}${dWs}</td>
-        <td>${inAvg?fmtWs(avg.ws):'<span style="color:#ccc">new</span>'}</td>
-        <td>${inSel?fmtPct(sel.m_acc):'<span style="color:#ccc">—</span>'}${dAcc}</td>
-        <td>${inAvg?fmtPct(avg.acc):'<span style="color:#ccc">new</span>'}</td>
-      </tr>`;
-    } else {
+    sorted.forEach(([n, p], i) => {
+      const pct = total > 0 ? (p.damage/total*100) : 0;
+      const gs  = i === 0 ? 'style="color:var(--gold);font-weight:500"' : '';
       h += `<tr>
         <td ${gs}>${n}</td>
-        <td ${gs}>${fmtPct(avg?.pct)}</td>
-        <td>${fmtWs(avg?.ws)}</td>
-        <td>${fmtPct(avg?.acc)}</td>
+        <td ${gs}>${fmtPct(pct)}</td>
+        <td class="num">${fmtDmg(p.damage||0)}</td>
+        <td>${p.m_acc > 0 ? p.m_acc.toFixed(1)+'%' : '—'}</td>
+        <td>${p.swings > 0 ? p.swings : '—'}</td>
+        <td>${fmtWs(p.ws_avg)}</td>
+        <td>${p.ws_count > 0 ? p.ws_count : '—'}</td>
       </tr>`;
-    }
-  });
+    });
 
-  $('pavg-body').innerHTML = h + '</tbody></table>';
+    $('pavg-body').innerHTML = h + '</tbody></table>';
+
+  } else if (selBossData && !selBossData.killed) {
+    // Boss not fought in selected run
+    $('pavg-body').innerHTML = `<div class="empty">${activeBoss} was not fought in this run.</div>`;
+
+  } else {
+    // No run selected — show historical averages across 9-boss runs
+    const avgRows = playerBossAvg(runs, activeBoss);
+    if (!avgRows.length) { $('pavg-body').innerHTML='<div class="empty">No 9-boss run data for this boss yet.</div>'; return; }
+    const fmtWs  = v => v != null && v > 0 ? (v >= 1000 ? Math.round(v/1000)+'k' : Math.round(v)) : '—';
+    const fmtPct = v => v != null && v > 0 ? v.toFixed(1)+'%' : '—';
+    let h = `<div style="padding:7px 14px 6px;font-size:10.5px;color:var(--text-3);border-bottom:1px solid var(--border)">Historical averages · 9-boss runs · ${activeBoss}</div>`;
+    h += `<table class="tbl"><thead><tr><th>Player</th><th>Avg dmg%</th><th>Avg WS</th><th>Avg acc</th></tr></thead><tbody>`;
+    avgRows.forEach((r,i)=>{
+      const gs = i===0 ? 'style="color:var(--gold);font-weight:500"' : '';
+      h+=`<tr><td ${gs}>${r.name}</td><td ${gs}>${fmtPct(r.pct)}</td><td>${fmtWs(r.ws)}</td><td>${fmtPct(r.acc)}</td></tr>`;
+    });
+    $('pavg-body').innerHTML = h + '</tbody></table>';
+  }
 }
 
 // ─── Render: boss time grid ───────────────────────────────────────────────
