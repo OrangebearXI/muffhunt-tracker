@@ -714,8 +714,9 @@ function renderDetail(run) {
     atp+='</tbody></table>';
   }
 
-  // Tags
+  // Tags — includes a toggleable HM/NM button for Aminon runs
   const totD=Object.values(run.bosses||{}).reduce((s,b)=>s+(b.deaths||[]).length,0);
+  const hasAminon = run.bosses_killed?.includes('Aminon');
   let tags='<div class="d-tags">';
   if (totD>0) tags+=`<span class="d-tag bdt">✝ ${totD} death${totD>1?'s':''}</span>`;
   if (run.bonus?.aurum_chest)  tags+=`<span class="d-tag" style="background:#f5f2ec;color:#888;border:1px solid #e8e3d8">Aurum Chest</span>`;
@@ -723,6 +724,10 @@ function renderDetail(run) {
   (run.bonus?.mini_nms||[]).forEach(nm=>tags+=`<span class="d-tag" style="background:#f5f2ec;color:#888;border:1px solid #e8e3d8">${nm}</span>`);
   if (run.old_case_plus1>0)    tags+=`<span class="d-tag b9hm">+${run.old_case_plus1} Old Case</span>`;
   if (run.note)                tags+=`<span style="font-size:11.5px;color:#999;font-style:italic">${run.note}</span>`;
+  if (hasAminon) {
+    const hm = run.hard_mode;
+    tags += `<button onclick="toggleHardMode('${run.id}')" style="border:1px solid ${hm?'var(--gold-light)':'var(--border)'};background:${hm?'var(--gold-bg)':'white'};color:${hm?'var(--gold)':'var(--text-3)'};font-family:var(--font);font-size:10.5px;font-weight:500;padding:2px 8px;border-radius:4px;cursor:pointer" title="Click to toggle hard mode">${hm?'HM':'NM'} <span style="font-size:9px;opacity:.6">toggle</span></button>`;
+  }
   tags+='</div>';
 
   $('d-body').innerHTML=`<div class="detail-grid">
@@ -944,7 +949,24 @@ async function confirmDelete() {
   } else { toast('Delete failed. Check your token in Settings.', true); }
 }
 
-// ─── Import ───────────────────────────────────────────────────────────────
+// ─── Toggle HM ────────────────────────────────────────────────────────────
+async function toggleHardMode(id) {
+  const run = allRuns.find(r => r.id === id);
+  if (!run) return;
+  run.hard_mode = !run.hard_mode;
+  const ok = await githubWrite(allRuns, `Set run ${id} ${run.hard_mode ? 'HM' : 'NM'}`);
+  if (ok) {
+    // Refresh the detail panel and table in place — no full re-render needed
+    if (selectedRun?.id === id) renderDetail(run);
+    renderRunTable();
+    renderStats();
+    toast(`Run marked as ${run.hard_mode ? 'Hard Mode' : 'Normal Mode'}.`);
+  } else {
+    // Roll back the local change if the write failed
+    run.hard_mode = !run.hard_mode;
+    toast('Save failed. Check your token in Settings.', true);
+  }
+}
 let pendingImports = [];  // array of parsed run objects ready to save
 
 function openImport() {
