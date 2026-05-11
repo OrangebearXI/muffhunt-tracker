@@ -1239,7 +1239,7 @@
       "group": "main",
       "gallimaufry": 81075,
       "old_case_plus1": 3,
-      "hard_mode": false,
+      "hard_mode": true,
       "meso_count": 0,
       "note": null,
       "party": [
