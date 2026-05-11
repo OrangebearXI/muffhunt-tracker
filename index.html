@@ -49,14 +49,15 @@ body { font-family: var(--font); background: var(--page-bg); color: var(--text-1
 .ibtn:hover { background: var(--gold-bg); color: var(--gold); border-color: var(--gold-light); }
 
 /* ── Stats ── */
-.stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
-.stat { background: white; border-radius: var(--r-md); border: 1px solid var(--border); padding: 14px 16px; }
+.stats { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 14px; }
+.stat { background: white; border-radius: var(--r-md); border: 1px solid var(--border); padding: 12px 13px; }
 .stat-lbl { font-size: 10px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
-.stat-val { font-size: 24px; font-weight: 600; letter-spacing: -.5px; color: var(--text-1); line-height: 1; }
+.stat-val { font-size: 22px; font-weight: 600; letter-spacing: -.5px; color: var(--text-1); line-height: 1; }
 .stat-sub { font-size: 10.5px; color: var(--text-3); margin-top: 3px; }
 .stat.gold  .stat-val { color: var(--gold); }
 .stat.teal  .stat-val { color: var(--teal); }
 .stat.amber .stat-val { color: #854F0B; }
+.stat.coral .stat-val { color: var(--coral); }
 
 /* ── Cards ── */
 .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; margin-bottom: 12px; }
@@ -134,13 +135,9 @@ body { font-family: var(--font); background: var(--page-bg); color: var(--text-1
 .btv-f { color: var(--teal); } .btv-a { color: var(--text-1); } .btv-s { color: var(--coral); }
 
 /* ── Attendance ── */
-.att-row { display: grid; border-bottom: 1px solid var(--border); }
-.att-row:last-child { border-bottom: none; }
 .att-name { padding: 7px 16px; font-size: 12px; font-weight: 500; }
 .att-pct { font-size: 9.5px; color: var(--text-3); font-weight: 400; }
 .att-cell { padding: 7px 4px; text-align: center; }
-.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.dot-y { background: var(--teal); } .dot-n { background: var(--coral); }
 
 /* ── Modals ── */
 .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.32); z-index: 100; align-items: center; justify-content: center; }
@@ -203,10 +200,11 @@ body { font-family: var(--font); background: var(--page-bg); color: var(--text-1
 
 <!-- Stats -->
 <div class="stats">
-  <div class="stat">         <div class="stat-lbl">Total Runs</div>     <div class="stat-val" id="s-runs">—</div><div class="stat-sub" id="s-runs-sub"></div></div>
+  <div class="stat">         <div class="stat-lbl">Total Runs</div>      <div class="stat-val" id="s-runs">—</div> <div class="stat-sub" id="s-runs-sub"></div></div>
   <div class="stat gold">   <div class="stat-lbl">Total Gallimaufry</div><div class="stat-val" id="s-galli">—</div><div class="stat-sub" id="s-galli-sub"></div></div>
-  <div class="stat teal">   <div class="stat-lbl">9-Boss Clears</div>  <div class="stat-val" id="s-9">—</div>   <div class="stat-sub">Aminon included</div></div>
-  <div class="stat amber">  <div class="stat-lbl">8-Boss Clears</div>  <div class="stat-val" id="s-8">—</div>   <div class="stat-sub">ABCDEFGH, no Aminon</div></div>
+  <div class="stat teal">   <div class="stat-lbl">9-Boss Clears</div>   <div class="stat-val" id="s-9">—</div>   <div class="stat-sub">Aminon included</div></div>
+  <div class="stat amber">  <div class="stat-lbl">8-Boss Clears</div>   <div class="stat-val" id="s-8">—</div>   <div class="stat-sub">ABCDEFGH, no Aminon</div></div>
+  <div class="stat coral">  <div class="stat-lbl">Meso drop rate</div>  <div class="stat-val" id="s-meso">—</div> <div class="stat-sub" id="s-meso-sub"></div></div>
 </div>
 
 <!-- Run history -->
@@ -313,7 +311,7 @@ const GOLD = '#BA7517', TEAL = '#1D9E75', CORAL = '#D85A30';
 let allRuns       = [];
 let activeGroup   = 'main';
 let selectedRun   = null;
-let activeBoss    = BOSSES[0];
+let activeBoss    = 'Aminon';
 let galliChart    = null;
 let pendingDelete = null;
 let pendingImport = null;
@@ -556,9 +554,27 @@ function avgTime(runs, boss) {
   const a=bossAvgTimes(runs)[boss]; return a.length ? Math.round(a.reduce((s,v)=>s+v,0)/a.length) : null;
 }
 
+// Average time-in-zone for each shard and metal across runs (9-boss only for meaningful data)
+function itemAvgTimes(runs) {
+  const shards={}, metals={};
+  LETTERS.forEach(l=>{ shards[l]=[]; metals[l]=[]; });
+  runs.forEach(r=>{
+    LETTERS.forEach(l=>{
+      const s=r.shards?.[l]; if(s?.obtained && s.inzone!=null) shards[l].push(s.inzone);
+      const m=r.metals?.[l]; if(m?.obtained && m.inzone!=null) metals[l].push(m.inzone);
+    });
+  });
+  const avg = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : null;
+  const out={shards:{},metals:{}};
+  LETTERS.forEach(l=>{ out.shards[l]=avg(shards[l]); out.metals[l]=avg(metals[l]); });
+  return out;
+}
+
 function playerBossAvg(runs, boss) {
+  // Only include 9-boss clears for meaningful averages
+  const nineBoss = runs.filter(r => r.bosses_killed?.includes('Aminon'));
   const t={};
-  runs.forEach(r=>{ const bd=r.bosses?.[boss]; if(!bd?.killed) return; Object.entries(bd.players||{}).forEach(([n,p])=>{ if(!t[n]) t[n]={pct:[],ws:[],acc:[]}; if(p.pct>0)t[n].pct.push(p.pct); if(p.ws_avg>0)t[n].ws.push(p.ws_avg); if(p.m_acc>0)t[n].acc.push(p.m_acc); }); });
+  nineBoss.forEach(r=>{ const bd=r.bosses?.[boss]; if(!bd?.killed) return; Object.entries(bd.players||{}).forEach(([n,p])=>{ if(!t[n]) t[n]={pct:[],ws:[],acc:[]}; if(p.pct>0)t[n].pct.push(p.pct); if(p.ws_avg>0)t[n].ws.push(p.ws_avg); if(p.m_acc>0)t[n].acc.push(p.m_acc); }); });
   const av = a => a.length ? a.reduce((s,v)=>s+v,0)/a.length : null;
   return Object.entries(t).map(([n,d])=>({name:n,pct:av(d.pct),ws:av(d.ws),acc:av(d.acc)})).filter(r=>r.pct!=null).sort((a,b)=>(b.pct||0)-(a.pct||0));
 }
@@ -569,12 +585,23 @@ function renderStats() {
   const galli=runs.reduce((s,r)=>s+(r.gallimaufry||0),0);
   const cl9=runs.filter(r=>r.bosses_killed?.includes('Aminon')).length;
   const cl8=runs.filter(r=>{ const k=r.bosses_killed||[]; return BOSSES.slice(0,8).every(b=>k.includes(b)) && !k.includes('Aminon'); }).length;
+
+  // Meso drop rate: hard mode Aminon kills where at least one meso dropped / total HM kills
+  const hmKills  = runs.filter(r => r.hard_mode && r.bosses_killed?.includes('Aminon'));
+  const mesoDrops= hmKills.filter(r => (r.meso_count||0) > 0);
+  const mesoRate = hmKills.length ? Math.round(mesoDrops.length / hmKills.length * 100) : null;
+  const totalMesos = runs.reduce((s,r) => s + (r.meso_count||0), 0);
+
   $('s-runs').textContent=runs.length;
   $('s-runs-sub').textContent=all.length+' total across groups';
   $('s-galli').textContent=abbrev(galli);
   $('s-galli-sub').textContent=runs[0]?comma(runs[0].gallimaufry)+' last run':'';
   $('s-9').textContent=cl9;
   $('s-8').textContent=cl8;
+  $('s-meso').textContent = mesoRate != null ? mesoRate+'%' : '—';
+  $('s-meso-sub').textContent = hmKills.length
+    ? `${mesoDrops.length}/${hmKills.length} HM kills · ${totalMesos} total`
+    : 'No HM kills recorded';
 }
 
 // ─── Render: run table ────────────────────────────────────────────────────
@@ -611,7 +638,7 @@ function renderRunTable() {
 
 // ─── Render: run detail ───────────────────────────────────────────────────
 function selectRun(run) {
-  selectedRun=run; renderRunTable(); renderDetail(run);
+  selectedRun=run; renderRunTable(); renderDetail(run); renderBossTabs();
   $('detail-card').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
@@ -620,9 +647,10 @@ function renderDetail(run) {
   $('d-title').textContent=run.date+(run.group==='baby'?' · Baby sortie':' · Main group');
   $('d-meta').textContent=(run.bosses_killed||[]).length+'/9 bosses';
 
-  // Boss timeline
+  // Boss timeline — columns: Boss | Bar | Duration | Time in zone | vs avg
   const maxDur=Math.max(...BOSSES.map(b=>run.bosses?.[b]?.fight_duration||0),1);
-  let tl=`<table class="tl"><thead><tr><th>Boss</th><th style="width:60px"></th><th>Duration</th><th>vs avg</th><th>In-zone at start</th></tr></thead><tbody>`;
+  const itemAvgs = itemAvgTimes(filtered());
+  let tl=`<table class="tl"><thead><tr><th>Boss</th><th style="width:60px"></th><th>Duration</th><th>Time in zone</th><th>vs avg</th></tr></thead><tbody>`;
   BOSSES.forEach(b=>{
     const bd=run.bosses?.[b]; if(!bd?.killed) return;
     const dur=bd.fight_duration, inz=bd.inzone_at_start;
@@ -631,9 +659,34 @@ function renderDetail(run) {
     const col=b==='Aminon'?GOLD:TEAL;
     let ps='—', pc='p-avg';
     if (dur!=null&&avg!=null) { const d=dur-avg; ps=Math.abs(d)>5?(d>0?'+':'')+d+'s':'on pace'; pc=d>5?'p-slow':d<-5?'p-fast':'p-avg'; }
-    tl+=`<tr><td style="font-weight:500;font-size:11.5px;white-space:nowrap">${b}</td><td><div class="bar"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div></td><td>${fmtDur(dur)}</td><td class="${pc}">${ps}</td><td class="inzone">${fmtDur(inz)}</td></tr>`;
+    tl+=`<tr><td style="font-weight:500;font-size:11.5px;white-space:nowrap">${b}</td><td><div class="bar"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div></td><td>${fmtDur(dur)}</td><td class="inzone">${fmtDur(inz)}</td><td class="${pc}">${ps}</td></tr>`;
   });
   tl+='</tbody></table>';
+
+  // Shard & metal avg timing table
+  const mkItemAvgTable = () => {
+    const shAvgs=itemAvgs.shards, meAvgs=itemAvgs.metals;
+    const hasAny = LETTERS.some(l=>shAvgs[l]!=null||meAvgs[l]!=null);
+    if (!hasAny) return '';
+    let t=`<div class="d-lbl" style="margin-top:14px;margin-bottom:6px">Shard &amp; Metal avg time in zone</div>`;
+    t+=`<table class="tl"><thead><tr><th></th>${LETTERS.map(l=>`<th style="text-align:center">${l}</th>`).join('')}</tr></thead><tbody>`;
+    t+=`<tr><td style="font-size:10px;color:var(--text-3);font-weight:500">Shard</td>${LETTERS.map(l=>{
+      const a=shAvgs[l], cur=run.shards?.[l];
+      const curVal=cur?.obtained&&cur.inzone!=null?cur.inzone:null;
+      let delta='';
+      if (a!=null&&curVal!=null) { const d=curVal-a; if(Math.abs(d)>10) delta=`<br><span style="font-size:9px;color:${d>0?'var(--coral)':'var(--teal)'}">${d>0?'+':''}${fmtDur(Math.abs(d))}</span>`; }
+      return `<td style="text-align:center;font-size:10.5px">${a!=null?fmtDur(a):'<span style="color:#ccc">—</span>'}${delta}</td>`;
+    }).join('')}</tr>`;
+    t+=`<tr><td style="font-size:10px;color:var(--text-3);font-weight:500">Metal</td>${LETTERS.map(l=>{
+      const a=meAvgs[l], cur=run.metals?.[l];
+      const curVal=cur?.obtained&&cur.inzone!=null?cur.inzone:null;
+      let delta='';
+      if (a!=null&&curVal!=null) { const d=curVal-a; if(Math.abs(d)>10) delta=`<br><span style="font-size:9px;color:${d>0?'var(--coral)':'var(--teal)'}">${d>0?'+':''}${fmtDur(Math.abs(d))}</span>`; }
+      return `<td style="text-align:center;font-size:10.5px">${a!=null?fmtDur(a):'<span style="color:#ccc">—</span>'}${delta}</td>`;
+    }).join('')}</tr>`;
+    t+='</tbody></table>';
+    return t;
+  };
 
   // Item grid builder
   const mkGrid=(data,label)=>{
@@ -666,24 +719,94 @@ function renderDetail(run) {
   tags+='</div>';
 
   $('d-body').innerHTML=`<div class="detail-grid">
-    <div><div class="d-lbl">Boss timeline</div>${tl}</div>
+    <div><div class="d-lbl">Boss timeline</div>${tl}${mkItemAvgTable()}</div>
     <div>${mkGrid(run.shards,"Ra'Kaznar Shards")}${mkGrid(run.metals,"Ra'Kaznar Metals")}${atp}${tags}</div>
   </div>`;
 }
 
 // ─── Render: player averages ──────────────────────────────────────────────
 function renderBossTabs() {
-  const runs=filtered();
-  $('boss-tabs').innerHTML=BOSSES.map(b=>`<button class="btab ${b===activeBoss?'on':''}" data-b="${b}">${b}</button>`).join('');
-  $('boss-tabs').querySelectorAll('.btab').forEach(bt=>{ bt.addEventListener('click',()=>{ activeBoss=bt.dataset.b; renderBossTabs(); }); });
-  const rows=playerBossAvg(runs,activeBoss);
-  if (!rows.length) { $('pavg-body').innerHTML='<div class="empty">No data for this boss yet.</div>'; return; }
-  let h=`<table class="tbl"><thead><tr><th>Player</th><th>Avg dmg %</th><th>Avg WS</th><th>Avg acc</th></tr></thead><tbody>`;
-  rows.forEach((r,i)=>{
-    const s=i===0?'style="color:var(--gold);font-weight:500"':'';
-    h+=`<tr><td ${s}>${r.name}</td><td ${s}>${r.pct!=null?r.pct.toFixed(1)+'%':'—'}</td><td>${r.ws!=null?(r.ws>=1000?Math.round(r.ws/1000)+'k':Math.round(r.ws)):'—'}</td><td>${r.acc!=null?r.acc.toFixed(1)+'%':'—'}</td></tr>`;
+  const runs = filtered();
+  $('boss-tabs').innerHTML = BOSSES.map(b =>
+    `<button class="btab ${b===activeBoss?'on':''}" data-b="${b}">${b}</button>`
+  ).join('');
+  $('boss-tabs').querySelectorAll('.btab').forEach(bt => {
+    bt.addEventListener('click', () => { activeBoss=bt.dataset.b; renderBossTabs(); });
   });
-  $('pavg-body').innerHTML=h+'</tbody></table>';
+
+  const avgRows = playerBossAvg(runs, activeBoss);
+  if (!avgRows.length) { $('pavg-body').innerHTML='<div class="empty">No 9-boss run data for this boss yet.</div>'; return; }
+
+  // Build avg lookup by player name
+  const avgByName = {};
+  avgRows.forEach(r => { avgByName[r.name] = r; });
+
+  // Get selected run stats for this boss (if run is selected and boss was killed)
+  const selBossData = selectedRun?.bosses?.[activeBoss];
+  const selPlayers  = (selBossData?.killed && selBossData?.players) ? selBossData.players : null;
+
+  // All players: union of historical avg players and current run players
+  const allNames = new Set(Object.keys(avgByName));
+  if (selPlayers) Object.keys(selPlayers).forEach(n => allNames.add(n));
+
+  // Sort: by avg pct desc, then by run pct desc for new players
+  const sorted = [...allNames].sort((a,b) => {
+    const ap = avgByName[a]?.pct ?? (selPlayers?.[a]?.pct ?? 0);
+    const bp = avgByName[b]?.pct ?? (selPlayers?.[b]?.pct ?? 0);
+    return bp - ap;
+  });
+
+  const fmtWs = v => v != null && v > 0 ? (v >= 1000 ? Math.round(v/1000)+'k' : Math.round(v)) : '—';
+  const fmtPct = v => v != null && v > 0 ? v.toFixed(1)+'%' : '—';
+
+  const hasSelected = !!selPlayers;
+  const selDate = selectedRun?.date ? selectedRun.date.split(' ').slice(1,3).join(' ') : 'This run';
+
+  let h = `<table class="tbl"><thead><tr>
+    <th>Player</th>`;
+  if (hasSelected) h += `<th>${selDate} dmg%</th><th>Avg dmg%</th><th>${selDate} WS</th><th>Avg WS</th><th>${selDate} acc</th><th>Avg acc</th>`;
+  else             h += `<th>Avg dmg%</th><th>Avg WS</th><th>Avg acc</th>`;
+  h += `</tr></thead><tbody>`;
+
+  sorted.forEach((n, i) => {
+    const avg = avgByName[n];
+    const sel = selPlayers?.[n];
+    const isTop = i === 0;
+    const gs = isTop ? 'style="color:var(--gold);font-weight:500"' : '';
+
+    if (hasSelected) {
+      const inSel = !!sel;
+      const inAvg = !!avg;
+      // Delta indicators for dmg%
+      let dPct='', dWs='', dAcc='';
+      if (sel && avg) {
+        const dp = (sel.pct||0) - (avg.pct||0);
+        dPct = Math.abs(dp)>0.5 ? ` <span style="font-size:9.5px;color:${dp>0?'var(--teal)':'var(--coral)'}">${dp>0?'▲':'▼'}${Math.abs(dp).toFixed(1)}</span>` : '';
+        const dw = (sel.ws_avg||0) - (avg.ws||0);
+        dWs  = Math.abs(dw)>100 ? ` <span style="font-size:9.5px;color:${dw>0?'var(--teal)':'var(--coral)'}">${dw>0?'▲':'▼'}${fmtWs(Math.abs(dw))}</span>` : '';
+        const da = (sel.m_acc||0) - (avg.acc||0);
+        dAcc = Math.abs(da)>0.5 ? ` <span style="font-size:9.5px;color:${da>0?'var(--teal)':'var(--coral)'}">${da>0?'▲':'▼'}${Math.abs(da).toFixed(1)}%</span>` : '';
+      }
+      h += `<tr>
+        <td ${gs}>${n}${!inSel?` <span style="font-size:9.5px;color:#ccc">absent</span>`:''}</td>
+        <td>${inSel?fmtPct(sel.pct):'<span style="color:#ccc">—</span>'}${dPct}</td>
+        <td ${gs}>${inAvg?fmtPct(avg.pct):'<span style="color:#ccc">new</span>'}</td>
+        <td>${inSel?fmtWs(sel.ws_avg):'<span style="color:#ccc">—</span>'}${dWs}</td>
+        <td>${inAvg?fmtWs(avg.ws):'<span style="color:#ccc">new</span>'}</td>
+        <td>${inSel?fmtPct(sel.m_acc):'<span style="color:#ccc">—</span>'}${dAcc}</td>
+        <td>${inAvg?fmtPct(avg.acc):'<span style="color:#ccc">new</span>'}</td>
+      </tr>`;
+    } else {
+      h += `<tr>
+        <td ${gs}>${n}</td>
+        <td ${gs}>${fmtPct(avg?.pct)}</td>
+        <td>${fmtWs(avg?.ws)}</td>
+        <td>${fmtPct(avg?.acc)}</td>
+      </tr>`;
+    }
+  });
+
+  $('pavg-body').innerHTML = h + '</tbody></table>';
 }
 
 // ─── Render: boss time grid ───────────────────────────────────────────────
@@ -723,24 +846,59 @@ function renderGalliChart() {
 
 // ─── Render: attendance ───────────────────────────────────────────────────
 function renderAttendance() {
-  const runs=filtered().slice(0,8);
+  const runs = filtered();
   if (!runs.length) { $('att-body').innerHTML='<div class="empty">No data.</div>'; return; }
-  const members={};
-  runs.forEach(r=>(r.party||[]).forEach(p=>{ members[p.name]=(members[p.name]||0)+1; }));
-  const sorted=Object.keys(members).sort((a,b)=>members[b]-members[a]);
-  const gc=`90px repeat(${runs.length},1fr)`;
-  let h=`<div class="att-row" style="grid-template-columns:${gc};background:#faf8f4">
-    <div class="att-name" style="font-size:10px;color:#aaa">Member</div>
-    ${runs.map(r=>`<div class="att-cell" style="font-size:9.5px;color:#aaa">${(r.date||'').split(' ').slice(1,3).join(' ')}</div>`).join('')}
-  </div>`;
-  sorted.forEach(n=>{
-    const pct=Math.round(members[n]/runs.length*100);
-    h+=`<div class="att-row" style="grid-template-columns:${gc}">
-      <div class="att-name">${n} <span class="att-pct">${pct}%</span></div>
-      ${runs.map(r=>`<div class="att-cell"><span class="dot ${(r.party||[]).some(p=>p.name===n)?'dot-y':'dot-n'}"></span></div>`).join('')}
-    </div>`;
+
+  const now   = new Date();
+  const thisM = now.getMonth();
+  const thisY = now.getFullYear();
+  const lastM = thisM === 0 ? 11 : thisM - 1;
+  const lastY = thisM === 0 ? thisY - 1 : thisY;
+
+  const monthName = (y, m) => new Date(y, m, 1).toLocaleString('default', {month:'short', year:'numeric'});
+
+  // Bucket runs by month
+  const thisRuns = runs.filter(r => { const d=new Date((r.timestamp||0)*1000); return d.getMonth()===thisM && d.getFullYear()===thisY; });
+  const lastRuns = runs.filter(r => { const d=new Date((r.timestamp||0)*1000); return d.getMonth()===lastM && d.getFullYear()===lastY; });
+  const allTime  = runs;
+
+  // Collect all member names across all runs
+  const allMembers = new Set();
+  runs.forEach(r => (r.party||[]).forEach(p => allMembers.add(p.name)));
+  const members = [...allMembers].sort((a,b) => {
+    // Sort by all-time attendance count desc
+    const ca = allTime.filter(r=>(r.party||[]).some(p=>p.name===a)).length;
+    const cb = allTime.filter(r=>(r.party||[]).some(p=>p.name===b)).length;
+    return cb - ca;
   });
-  $('att-body').innerHTML=h;
+
+  if (!members.length) { $('att-body').innerHTML='<div class="empty">No party data recorded yet.</div>'; return; }
+
+  const count = (name, bucket) => bucket.filter(r=>(r.party||[]).some(p=>p.name===name)).length;
+  const frac  = (n, total) => total ? `${n}/${total}` : '—';
+  const pct   = (n, total) => total ? Math.round(n/total*100)+'%' : '—';
+
+  let h = `<table class="tbl"><thead><tr>
+    <th>Player</th>
+    <th>${monthName(thisY, thisM)}</th>
+    <th>${monthName(lastY, lastM)}</th>
+    <th>All time</th>
+  </tr></thead><tbody>`;
+
+  members.forEach(n => {
+    const tc = count(n, thisRuns),  tl = thisRuns.length;
+    const lc = count(n, lastRuns),  ll = lastRuns.length;
+    const ac = count(n, allTime),   al = allTime.length;
+    const tcol = tl && tc/tl < 0.5 ? 'color:var(--coral)' : tl && tc===tl ? 'color:var(--teal)' : '';
+    h += `<tr>
+      <td style="font-weight:500">${n}</td>
+      <td><span style="${tcol}">${frac(tc,tl)}</span> <span style="color:#ccc;font-size:10.5px">${pct(tc,tl)}</span></td>
+      <td>${frac(lc,ll)} <span style="color:#ccc;font-size:10.5px">${pct(lc,ll)}</span></td>
+      <td>${frac(ac,al)} <span style="color:#ccc;font-size:10.5px">${pct(ac,al)}</span></td>
+    </tr>`;
+  });
+
+  $('att-body').innerHTML = h + '</tbody></table>';
 }
 
 // ─── Full render ──────────────────────────────────────────────────────────
