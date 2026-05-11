@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MuffHunt · Sortie Tracker</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold:       #BA7517;
+  --gold-light: #FAC775;
+  --gold-bg:    #FAEEDA;
+  --teal:       #1D9E75;
+  --teal-bg:    #E1F5EE;
+  --coral:      #D85A30;
+  --coral-bg:   #FAECE7;
+  --page-bg:    #f4f2ee;
+  --card-bg:    #ffffff;
+  --border:     #e8e3d8;
+  --border-2:   #d8d3c8;
+  --text-1:     #1c1a16;
+  --text-2:     #6b6558;
+  --text-3:     #a09890;
+  --font:       -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', sans-serif;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px;
+}
+
+body { font-family: var(--font); background: var(--page-bg); color: var(--text-1); min-height: 100vh; font-size: 14px; line-height: 1.5; }
+
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px 48px; }
+
+/* ── Header ── */
+.hdr { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 16px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { width: 36px; height: 36px; background: var(--gold-bg); border: 1px solid var(--gold-light); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--gold); letter-spacing: -.3px; }
+.logo-name { font-size: 15px; font-weight: 600; color: var(--text-1); letter-spacing: -.3px; }
+.logo-sub  { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+.hdr-right { display: flex; align-items: center; gap: 8px; }
+.hdr-time  { font-size: 11px; color: var(--text-3); text-align: right; white-space: nowrap; }
+
+/* ── Toggle ── */
+.toggle { display: flex; background: white; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 3px; gap: 2px; }
+.tgl { border: none; background: none; font-family: var(--font); font-size: 12px; padding: 5px 14px; border-radius: 4px; cursor: pointer; color: var(--text-2); font-weight: 400; }
+.tgl.on { background: var(--gold-bg); color: var(--gold); font-weight: 500; }
+
+/* ── Icon buttons ── */
+.ibtn { width: 32px; height: 32px; border: 1px solid var(--border); background: white; border-radius: var(--r-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text-2); }
+.ibtn:hover { background: var(--gold-bg); color: var(--gold); border-color: var(--gold-light); }
+
+/* ── Stats ── */
+.stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+.stat { background: white; border-radius: var(--r-md); border: 1px solid var(--border); padding: 14px 16px; }
+.stat-lbl { font-size: 10px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
+.stat-val { font-size: 24px; font-weight: 600; letter-spacing: -.5px; color: var(--text-1); line-height: 1; }
+.stat-sub { font-size: 10.5px; color: var(--text-3); margin-top: 3px; }
+.stat.gold  .stat-val { color: var(--gold); }
+.stat.teal  .stat-val { color: var(--teal); }
+.stat.amber .stat-val { color: #854F0B; }
+
+/* ── Cards ── */
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; margin-bottom: 12px; }
+.card-hdr { padding: 11px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: white; }
+.card-ttl { font-size: 10.5px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; }
+.card-meta { font-size: 10.5px; color: var(--text-3); }
+
+.sec-lbl { font-size: 10px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .6px; margin: 4px 0 8px; }
+
+/* ── Tables ── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tbl th { padding: 7px 14px; text-align: left; font-size: 10px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid var(--border); background: #faf8f4; white-space: nowrap; }
+.tbl td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tbody tr { cursor: pointer; }
+.tbl tbody tr:hover td { background: #faf8f4; }
+.tbl tbody tr.sel td { background: var(--gold-bg); }
+
+/* ── Badges ── */
+.bdg { display: inline-flex; align-items: center; font-size: 10.5px; border-radius: 4px; padding: 2px 7px; font-weight: 500; white-space: nowrap; }
+.b9  { background: var(--teal-bg); color: #085041; }
+.b9hm{ background: var(--gold-bg); color: var(--gold); }
+.b8  { background: #E6F1FB; color: #185FA5; }
+.bpt { background: #f5f2ec; color: var(--text-2); border: 1px solid var(--border); }
+.bhm { background: var(--gold-bg); color: var(--gold); }
+.bnm { background: #f5f2ec; color: var(--text-2); }
+.bby { background: #E6F1FB; color: #185FA5; }
+.bdt { background: var(--coral-bg); color: var(--coral); }
+
+/* ── Delete btn ── */
+.del-btn { width: 24px; height: 24px; border: 1px solid var(--border); background: white; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-3); opacity: 0; transition: opacity .1s; font-family: var(--font); }
+.tbl tr:hover .del-btn { opacity: 1; }
+.del-btn:hover { background: var(--coral-bg); color: var(--coral); border-color: var(--coral); }
+
+/* ── Run detail ── */
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; }
+.d-lbl { font-size: 10px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 7px; }
+
+/* ── Timeline ── */
+.tl { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+.tl th { font-size: 9.5px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .3px; padding: 5px 6px; border-bottom: 1px solid var(--border); background: #faf8f4; text-align: left; }
+.tl td { padding: 5px 6px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; vertical-align: middle; }
+.tl tr:last-child td { border-bottom: none; }
+.bar { height: 3px; border-radius: 2px; background: #ece8e0; overflow: hidden; width: 60px; }
+.bar-fill { height: 100%; border-radius: 2px; }
+.p-fast { color: var(--teal); font-weight: 500; font-size: 10.5px; }
+.p-slow { color: var(--coral); font-weight: 500; font-size: 10.5px; }
+.p-avg  { color: var(--text-3); font-size: 10.5px; }
+.inzone { font-size: 10.5px; color: var(--text-3); }
+
+/* ── Item grid (shards/metals) ── */
+.item-grid { display: grid; grid-template-columns: repeat(8,1fr); gap: 5px; margin-bottom: 8px; }
+.item { border-radius: 6px; padding: 5px 3px; text-align: center; border: 1px solid var(--border); background: #faf8f4; }
+.item.got { background: var(--teal-bg); border-color: #9FE1CB; }
+.item-l { font-size: 12px; font-weight: 500; display: block; color: var(--text-2); }
+.item.got .item-l { color: #085041; }
+.item-t { font-size: 9px; display: block; margin-top: 1px; color: var(--text-3); }
+.item.got .item-t { color: var(--teal); }
+
+.d-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+.d-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; padding: 2px 7px; border-radius: 4px; font-weight: 500; }
+
+/* ── Boss tabs ── */
+.boss-tabs { display: flex; background: #faf8f4; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.btab { border: none; background: none; font-family: var(--font); font-size: 11.5px; padding: 8px 12px; color: var(--text-2); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; flex-shrink: 0; }
+.btab.on { color: var(--gold); border-bottom-color: var(--gold); font-weight: 500; }
+
+/* ── Boss time grid ── */
+.boss-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
+.bt-card { background: white; border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; }
+.bt-name { font-size: 10px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 9px; }
+.bt-row  { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+.btl { font-size: 9px; color: var(--text-3); margin-bottom: 1px; }
+.btv { font-size: 13px; font-weight: 600; }
+.btv-f { color: var(--teal); } .btv-a { color: var(--text-1); } .btv-s { color: var(--coral); }
+
+/* ── Attendance ── */
+.att-row { display: grid; border-bottom: 1px solid var(--border); }
+.att-row:last-child { border-bottom: none; }
+.att-name { padding: 7px 16px; font-size: 12px; font-weight: 500; }
+.att-pct { font-size: 9.5px; color: var(--text-3); font-weight: 400; }
+.att-cell { padding: 7px 4px; text-align: center; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.dot-y { background: var(--teal); } .dot-n { background: var(--coral); }
+
+/* ── Modals ── */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.32); z-index: 100; align-items: center; justify-content: center; }
+.overlay.open { display: flex; }
+.modal { background: white; border-radius: var(--r-lg); border: 1px solid var(--border); width: 520px; max-width: calc(100vw - 40px); max-height: 85vh; overflow-y: auto; padding: 24px; }
+.modal-ttl { font-size: 16px; font-weight: 600; color: var(--text-1); margin-bottom: 4px; letter-spacing: -.3px; }
+.modal-sub { font-size: 12.5px; color: var(--text-2); margin-bottom: 16px; line-height: 1.55; }
+.modal-lbl { font-size: 11px; font-weight: 500; color: var(--text-2); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 5px; display: block; }
+.modal-inp { width: 100%; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 9px 12px; font-family: var(--font); font-size: 13px; color: var(--text-1); background: white; outline: none; margin-bottom: 14px; }
+.modal-inp:focus { border-color: var(--gold); }
+.modal-ta { width: 100%; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 9px 12px; font-family: monospace; font-size: 11px; color: var(--text-1); background: white; outline: none; height: 200px; resize: vertical; margin-bottom: 14px; }
+.modal-ta:focus { border-color: var(--gold); }
+.modal-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.import-preview { background: #faf8f4; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 10px 12px; font-size: 11.5px; color: var(--text-2); margin-bottom: 14px; line-height: 1.6; white-space: pre-wrap; font-family: monospace; }
+
+/* ── Buttons ── */
+.btn { border: 1px solid var(--border); background: white; font-family: var(--font); font-size: 13px; padding: 8px 16px; border-radius: var(--r-sm); cursor: pointer; color: var(--text-1); font-weight: 500; }
+.btn:hover { background: #faf8f4; }
+.btn-gold { background: var(--gold); color: white; border-color: var(--gold); }
+.btn-gold:hover { background: #a3660f; border-color: #a3660f; }
+.btn-red  { background: var(--coral); color: white; border-color: var(--coral); }
+.btn-red:hover { background: #b84d25; }
+
+/* ── Toast ── */
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1c1a16; color: white; padding: 10px 16px; border-radius: var(--r-sm); font-size: 13px; opacity: 0; transform: translateY(8px); transition: all .2s; z-index: 200; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.err  { background: var(--coral); }
+
+/* ── Misc ── */
+.loading { text-align: center; padding: 40px; color: var(--text-3); font-size: 13px; }
+.empty   { text-align: center; padding: 28px; color: var(--text-3); font-size: 12.5px; }
+.num  { font-variant-numeric: tabular-nums; }
+.gold { color: var(--gold); }
+.teal { color: var(--teal); }
+.coral{ color: var(--coral); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- Header -->
+<header class="hdr">
+  <div class="logo">
+    <div class="logo-mark">MH</div>
+    <div>
+      <div class="logo-name">MuffHunt</div>
+      <div class="logo-sub">OrangebearXI · Fenrir · Sortie Tracker</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="toggle">
+      <button class="tgl on" id="btn-main" onclick="switchGroup('main')">Main group</button>
+      <button class="tgl"    id="btn-baby" onclick="switchGroup('baby')">Baby sortie</button>
+    </div>
+    <span id="hdr-time" class="hdr-time"></span>
+    <button class="ibtn" title="Import historical run" onclick="openImport()">&#8679;</button>
+    <button class="ibtn" title="Settings" onclick="openSettings()">&#9881;</button>
+  </div>
+</header>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat">         <div class="stat-lbl">Total Runs</div>     <div class="stat-val" id="s-runs">—</div><div class="stat-sub" id="s-runs-sub"></div></div>
+  <div class="stat gold">   <div class="stat-lbl">Total Gallimaufry</div><div class="stat-val" id="s-galli">—</div><div class="stat-sub" id="s-galli-sub"></div></div>
+  <div class="stat teal">   <div class="stat-lbl">9-Boss Clears</div>  <div class="stat-val" id="s-9">—</div>   <div class="stat-sub">Aminon included</div></div>
+  <div class="stat amber">  <div class="stat-lbl">8-Boss Clears</div>  <div class="stat-val" id="s-8">—</div>   <div class="stat-sub">ABCDEFGH, no Aminon</div></div>
+</div>
+
+<!-- Run history -->
+<div class="card">
+  <div class="card-hdr"><span class="card-ttl" id="hist-ttl">Run History</span><span class="card-meta" id="hist-cnt"></span></div>
+  <div id="run-tbl-wrap"><div class="loading">Loading runs…</div></div>
+</div>
+
+<!-- Run detail -->
+<div class="card" id="detail-card" style="display:none">
+  <div class="card-hdr"><span class="card-ttl" id="d-title"></span><span class="card-meta" id="d-meta"></span></div>
+  <div id="d-body"></div>
+</div>
+
+<!-- Player averages -->
+<div class="sec-lbl">Player averages by boss</div>
+<div class="card">
+  <div class="boss-tabs" id="boss-tabs"></div>
+  <div id="pavg-body"></div>
+</div>
+
+<!-- Boss time grid -->
+<div class="sec-lbl">Boss performance — fight time</div>
+<div class="boss-grid" id="boss-grid"></div>
+
+<!-- Galli chart -->
+<div class="card">
+  <div class="card-hdr"><span class="card-ttl">Gallimaufry per run</span><span class="card-meta" id="galli-meta"></span></div>
+  <div style="padding:14px 16px">
+    <div style="position:relative;width:100%;height:150px">
+      <canvas id="galli-canvas" role="img" aria-label="Gallimaufry earned per run over time"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Attendance -->
+<div class="sec-lbl">Attendance — last 8 runs</div>
+<div class="card"><div id="att-body"></div></div>
+
+</div><!-- /wrap -->
+
+<!-- Settings modal -->
+<div class="overlay" id="mo-settings">
+  <div class="modal">
+    <div class="modal-ttl">Settings</div>
+    <div class="modal-sub">Your GitHub token is stored locally in your browser. It is only used to import runs and delete records. Viewing the dashboard works without a token since the repo is public.</div>
+    <label class="modal-lbl">GitHub Personal Access Token</label>
+    <input type="password" class="modal-inp" id="tok-inp" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    <div class="modal-sub" style="margin-top:-8px">Generate at GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens. Grant <strong>Contents: Read and Write</strong> on the muffhunt-tracker repo only.</div>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-gold" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import modal -->
+<div class="overlay" id="mo-import">
+  <div class="modal">
+    <div class="modal-ttl">Import historical run</div>
+    <div class="modal-sub">Paste the full contents of a MuffinMan or MuffHunt text report. Fields not present in older formats are left blank. A GitHub token is required to save.</div>
+    <label class="modal-lbl">Report text</label>
+    <textarea class="modal-ta" id="import-ta" placeholder="Paste report text here…"></textarea>
+    <div id="import-preview" style="display:none" class="import-preview"></div>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeImport()">Cancel</button>
+      <button class="btn" onclick="previewImport()">Preview</button>
+      <button class="btn btn-gold" id="import-ok" style="display:none" onclick="confirmImport()">Import run</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete modal -->
+<div class="overlay" id="mo-delete">
+  <div class="modal" style="width:380px">
+    <div class="modal-ttl">Delete this run?</div>
+    <div class="modal-sub" id="del-sub">This cannot be undone.</div>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeDelete()">Cancel</button>
+      <button class="btn btn-red" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+'use strict';
+
+// ─── Config ───────────────────────────────────────────────────────────────
+const OWNER   = 'OrangebearXI';
+const REPO    = 'muffhunt-tracker';
+const FILE    = 'runs.json';
+const RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/main/${FILE}`;
+const API_URL = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
+
+const BOSSES  = ['Ghatjot','Leshonn','Skomora','Degei','Dhartok','Gartell','Triboulex','Aita','Aminon'];
+const LETTERS = ['A','B','C','D','E','F','G','H'];
+const GOLD = '#BA7517', TEAL = '#1D9E75', CORAL = '#D85A30';
+
+// ─── State ────────────────────────────────────────────────────────────────
+let allRuns       = [];
+let activeGroup   = 'main';
+let selectedRun   = null;
+let activeBoss    = BOSSES[0];
+let galliChart    = null;
+let pendingDelete = null;
+let pendingImport = null;
+
+// ─── Utils ────────────────────────────────────────────────────────────────
+const $   = id => document.getElementById(id);
+const comma   = n => (n||0).toLocaleString();
+const abbrev  = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? Math.floor(n/1e3)+'k' : String(n);
+const fmtDur  = s => { if (s == null) return '—'; const m=Math.floor(s/60),sec=s%60; return m>0?`${m}m${sec}s`:`${sec}s`; };
+const filtered = () => allRuns.filter(r => (r.group||'main') === activeGroup);
+const token   = () => localStorage.getItem('mh_token')||'';
+
+function toast(msg, err=false) {
+  const el=$('toast'); el.textContent=msg; el.className='toast show'+(err?' err':'');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ─── GitHub API ───────────────────────────────────────────────────────────
+async function fetchRuns() {
+  try {
+    const r = await fetch(RAW_URL+'?t='+Date.now());
+    if (!r.ok) return [];
+    const d = await r.json();
+    return Array.isArray(d.runs) ? d.runs : [];
+  } catch { return []; }
+}
+
+async function githubWrite(runs, msg) {
+  const tok = token();
+  if (!tok) { toast('GitHub token required — open Settings.', true); return false; }
+  let sha = null;
+  try {
+    const r = await fetch(API_URL, {headers:{'Authorization':'token '+tok,'User-Agent':'MuffHunt-Dashboard'}});
+    if (r.ok) sha = (await r.json()).sha;
+  } catch {}
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify({runs},null,2))));
+  const body = {message:msg, content};
+  if (sha) body.sha = sha;
+  try {
+    const r = await fetch(API_URL, {method:'PUT',headers:{'Authorization':'token '+tok,'Content-Type':'application/json','User-Agent':'MuffHunt-Dashboard'},body:JSON.stringify(body)});
+    return r.ok || r.status===201;
+  } catch { return false; }
+}
+
+// ─── Text report parser ───────────────────────────────────────────────────
+function parseDur(s) {
+  if (!s) return null;
+  const ms = s.match(/(\d+)\s*m(?:in)?\s*(\d+)\s*s/i); if (ms) return +ms[1]*60+ +ms[2];
+  const so = s.match(/^(\d+)\s*s(?:ec)?$/i);            if (so) return +so[1];
+  const n  = s.match(/^(\d+)$/);                        if (n)  return +n[1];
+  return null;
+}
+
+function parseReport(text) {
+  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+  if (!lines[0]) return null;
+  const isMH  = lines[0].startsWith('[MuffHunt Report');
+  const isMM  = lines[0].startsWith('[Sortie Report');
+  if (!isMH && !isMM) return null;
+
+  const run = {
+    id:'', date:'', timestamp:0, group:'main',
+    gallimaufry:0, old_case_plus1:0, hard_mode:false, meso_count:0, note:null,
+    party:[], bonus:{aurum_chest:false, naakuals:0, mini_nms:[]},
+    shards:{}, metals:{}, bosses_killed:[], bosses:{},
+  };
+  LETTERS.forEach(l => { run.shards[l]={obtained:false,inzone:null}; run.metals[l]={obtained:false,inzone:null}; });
+  BOSSES.forEach(b  => { run.bosses[b]={killed:false,fight_duration:null,inzone_at_start:null,deaths:[],rolls:null,players:{}}; });
+
+  // Date + ID
+  const dm = lines[0].match(/\[(?:MuffHunt Report|Sortie Report)\s*-\s*(.+?)(?:\]\s*\[|\])/);
+  if (dm) {
+    run.date = dm[1].trim();
+    const pd = new Date(run.date);
+    run.timestamp = isNaN(pd) ? Date.now()/1000 : pd.getTime()/1000;
+    run.id = new Date(run.timestamp*1000).toISOString().slice(0,19).replace(/[T:]/g,'-').replace(/-(?=\d{2}$)/,'_').replace(/T/,'_');
+    // cleaner id format YYYY-MM-DD_HH-MM-SS
+    const d = new Date(run.timestamp*1000);
+    run.id = [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-')
+           + '_' + [String(d.getHours()).padStart(2,'0'), String(d.getMinutes()).padStart(2,'0'), String(d.getSeconds()).padStart(2,'0')].join('-');
+  }
+  const gm = lines[0].match(/\[(MAIN|BABY)\]/i);
+  if (gm) run.group = gm[1].toLowerCase();
+
+  let sec='', boss=null, inDmg=false, inWs=false, inAtp=false;
+
+  for (let i=1; i<lines.length; i++) {
+    const ln = lines[i], lo = ln.toLowerCase();
+    if (ln==='-----------------------------') { inDmg=false; inWs=false; inAtp=false; continue; }
+
+    // Top-level fields
+    if (ln.startsWith('Total Gallimaufry:'))  { run.gallimaufry   = parseInt(ln.replace(/[^\d]/g,''))||0; continue; }
+    if (ln.startsWith('Total Old Case +1:'))  { run.old_case_plus1= parseInt(ln.replace(/[^\d]/g,''))||0; continue; }
+    if (ln==='Hard Mode')                     { run.hard_mode=true; continue; }
+    if (ln.startsWith('Mesos obtained:'))     { run.meso_count    = parseInt(ln.replace(/[^\d]/g,''))||0; continue; }
+
+    // Section headers
+    if (lo.includes('defeated bosses')  || lo.includes('boss damage breakdown')) { sec='bosses'; boss=null; continue; }
+    if (lo.includes('bonus objectives') || lo==='[bonus objectives]')            { sec='bonus'; continue; }
+    if (lo.includes('party composition')|| ln==='[Party]')                       { sec='party'; continue; }
+    if (ln==='[COR Rolls]')                                                       { sec='rolls'; continue; }
+    if (lo.includes('shards') && lo.includes('metals'))                          { sec='items'; continue; }
+    if (lo.includes('extra notes')      || ln==='[Notes]')                       { sec='notes'; continue; }
+    if (ln==='[Absorb-TP]')                                                       { sec='atp'; inAtp=true; continue; }
+
+    // Boss section entry (e.g. [Ghatjot])
+    if (sec==='bosses') {
+      const bm = ln.match(/^\[([A-Z][a-z]+)\]$/);
+      if (bm && BOSSES.includes(bm[1])) {
+        boss=bm[1]; run.bosses[boss].killed=true;
+        if (!run.bosses_killed.includes(boss)) run.bosses_killed.push(boss);
+        inDmg=false; inWs=false; inAtp=false; sec='bosses'; continue;
+      }
+      // Old MuffinMan format: bare boss names in defeated bosses section
+      if (isMM && !boss && BOSSES.includes(ln)) {
+        run.bosses[ln].killed=true;
+        if (!run.bosses_killed.includes(ln)) run.bosses_killed.push(ln);
+        continue;
+      }
+    }
+
+    if (boss) {
+      const bd = run.bosses[boss];
+
+      // Fight duration (MuffHunt format)
+      const fdm = ln.match(/^\[Fight Duration\]\s+(.+)/);
+      if (fdm) { bd.fight_duration=parseDur(fdm[1]); continue; }
+
+      // In-zone at start
+      const izm = ln.match(/^\[In-Zone at Start\]\s+(.+)/);
+      if (izm) { bd.inzone_at_start=parseDur(izm[1]); continue; }
+
+      // Old MuffinMan fight duration header
+      if (ln==='[Aminon Fight Duration]') {
+        const nl=lines[i+1]; if (nl) { const m=nl.match(/(\d+)\s+min\s+(\d+)\s+sec/); if(m){bd.fight_duration=+m[1]*60+ +m[2];i++;} } continue;
+      }
+
+      // Deaths
+      if (ln.startsWith('[Deaths]')) { bd.deaths=ln.slice(8).split(',').map(s=>s.trim()).filter(Boolean); continue; }
+
+      // COR rolls
+      if (sec==='rolls') {
+        if (!bd.rolls) bd.rolls={misers:0,misers_lucky:false,tacticians:0,tacticians_lucky:false,wildcard:0};
+        const rm = ln.match(/Miser.s:\s*(\d+)/i);
+        if (rm) { bd.rolls.misers=+rm[1]; bd.rolls.misers_lucky=ln.toLowerCase().includes('lucky'); }
+        const rt = ln.match(/Tactician.s:\s*(\d+)/i);
+        if (rt) { bd.rolls.tacticians=+rt[1]; bd.rolls.tacticians_lucky=ln.toLowerCase().includes('lucky'); }
+        const rw = ln.match(/Wild Card:\s*(\d+)/i);
+        if (rw) bd.rolls.wildcard=+rw[1];
+        continue;
+      }
+
+      // Damage/WS table headers
+      if (ln.match(/^Name\s+Damage\s+Percent/i))          { inDmg=true; inWs=false; continue; }
+      if (ln.match(/^Name\s+Damage\s+Avg WS/i))           { inDmg=true; inWs=false; continue; }
+      if (ln.match(/^Name\s+WS Avg/i) && !isMH)           { inWs=true;  inDmg=false; continue; }
+      if (inAtp && ln.match(/^Name\s+Hit/i))               { continue; }
+
+      // MuffinMan damage row: "NAME   123456   (12.3%)"
+      if (inDmg && isMM && !ln.startsWith('[') && ln.length>3) {
+        const p=ln.split(/\s{2,}/);
+        if (p.length>=2) {
+          const nm=p[0], dmg=parseInt(p[1].replace(/,/g,''))||0;
+          const pct=parseFloat((p[2]||'').replace(/[()%]/g,''))||0;
+          if (nm && dmg>0) { bd.players[nm]={damage:dmg,pct:pct,ws_avg:0,ws_count:0,ws_acc:0,m_acc:0,swings:0}; }
+        }
+        continue;
+      }
+
+      // MuffHunt damage row: "NAME   dmg   wsavg   wscount   wsacc%   acc%   swings"
+      if (inDmg && isMH && !ln.startsWith('[') && ln.length>3) {
+        const p=ln.split(/\s{2,}/);
+        if (p.length>=6) {
+          const nm=p[0],dmg=parseInt(p[1].replace(/,/g,''))||0;
+          if (nm && dmg>0) bd.players[nm]={damage:dmg,pct:0,ws_avg:parseInt(p[2].replace(/,/g,''))||0,ws_count:parseInt(p[3])||0,ws_acc:parseFloat(p[4])||0,m_acc:parseFloat(p[5])||0,swings:parseInt(p[6])||0};
+        }
+        continue;
+      }
+
+      // MuffinMan WS avg row: "NAME   64000   10"
+      if (inWs && !ln.startsWith('[') && ln.length>3) {
+        const p=ln.split(/\s{2,}/);
+        if (p.length>=2 && bd.players[p[0]]) { bd.players[p[0]].ws_avg=parseInt(p[1].replace(/,/g,''))||0; bd.players[p[0]].ws_count=parseInt(p[2])||0; }
+        continue;
+      }
+
+      // Absorb-TP row
+      if (inAtp && !ln.startsWith('[') && ln.length>3) {
+        const p=ln.split(/\s{2,}/);
+        if (p.length>=4) { if(!bd.absorb_tp)bd.absorb_tp={}; bd.absorb_tp[p[0]]={success:+p[1]||0,zero_tp:+p[2]||0,resist:+p[3]||0,avg_tp:+p[4]||0}; }
+        continue;
+      }
+    }
+
+    // Bonus
+    if (sec==='bonus') {
+      if (lo.includes('aurum')) run.bonus.aurum_chest=true;
+      else if (lo.includes('naakual')) run.bonus.naakuals=Math.max(run.bonus.naakuals,parseInt(ln.match(/(\d+)/)?.[1])||1);
+      else { const nms=['Botulus','Ixion','Naraka','Tulittia','Flan']; nms.forEach(nm=>{ if(ln.includes(nm)&&!run.bonus.mini_nms.includes(nm)) run.bonus.mini_nms.push(nm); }); }
+      continue;
+    }
+
+    // Party
+    if (sec==='party') {
+      const m=ln.match(/^(.+?)\s+\((.+?)\)$/); if(m) run.party.push({name:m[1],job:m[2]}); continue;
+    }
+
+    // Items (MuffHunt)
+    if (sec==='items') {
+      const sm=ln.match(/^Shards?:\s+(.+)/i); if(sm){sm[1].match(/([A-H])\(([^)]+)\)/g)?.forEach(it=>{const im=it.match(/([A-H])\(([^)]+)\)/);if(im){run.shards[im[1]].obtained=true;run.shards[im[1]].inzone=parseDur(im[2]);}});}
+      const mm=ln.match(/^Metals?:\s+(.+)/i); if(mm){mm[1].match(/([A-H])\(([^)]+)\)/g)?.forEach(it=>{const im=it.match(/([A-H])\(([^)]+)\)/);if(im){run.metals[im[1]].obtained=true;run.metals[im[1]].inzone=parseDur(im[2]);}});}
+      continue;
+    }
+
+    // Notes
+    if (sec==='notes' && ln!=='Nothing to add') { run.note=(run.note?run.note+' ':'')+ln; continue; }
+  }
+
+  // Compute pct for old-format rows where we only have raw damage
+  BOSSES.forEach(b => {
+    const pl=run.bosses[b].players, tot=Object.values(pl).reduce((s,p)=>s+(p.damage||0),0);
+    if (tot>0) Object.values(pl).forEach(p=>{ if(!p.pct) p.pct=parseFloat(((p.damage/tot)*100).toFixed(1)); });
+  });
+
+  return run;
+}
+
+// ─── Computed stats ───────────────────────────────────────────────────────
+function bossAvgTimes(runs) {
+  const out={}; BOSSES.forEach(b=>out[b]=[]);
+  runs.forEach(r=>BOSSES.forEach(b=>{ const d=r.bosses?.[b]?.fight_duration; if(d!=null) out[b].push(d); }));
+  return out;
+}
+
+function avgTime(runs, boss) {
+  const a=bossAvgTimes(runs)[boss]; return a.length ? Math.round(a.reduce((s,v)=>s+v,0)/a.length) : null;
+}
+
+function playerBossAvg(runs, boss) {
+  const t={};
+  runs.forEach(r=>{ const bd=r.bosses?.[boss]; if(!bd?.killed) return; Object.entries(bd.players||{}).forEach(([n,p])=>{ if(!t[n]) t[n]={pct:[],ws:[],acc:[]}; if(p.pct>0)t[n].pct.push(p.pct); if(p.ws_avg>0)t[n].ws.push(p.ws_avg); if(p.m_acc>0)t[n].acc.push(p.m_acc); }); });
+  const av = a => a.length ? a.reduce((s,v)=>s+v,0)/a.length : null;
+  return Object.entries(t).map(([n,d])=>({name:n,pct:av(d.pct),ws:av(d.ws),acc:av(d.acc)})).filter(r=>r.pct!=null).sort((a,b)=>(b.pct||0)-(a.pct||0));
+}
+
+// ─── Render: stats ────────────────────────────────────────────────────────
+function renderStats() {
+  const runs=filtered(), all=allRuns;
+  const galli=runs.reduce((s,r)=>s+(r.gallimaufry||0),0);
+  const cl9=runs.filter(r=>r.bosses_killed?.includes('Aminon')).length;
+  const cl8=runs.filter(r=>{ const k=r.bosses_killed||[]; return BOSSES.slice(0,8).every(b=>k.includes(b)) && !k.includes('Aminon'); }).length;
+  $('s-runs').textContent=runs.length;
+  $('s-runs-sub').textContent=all.length+' total across groups';
+  $('s-galli').textContent=abbrev(galli);
+  $('s-galli-sub').textContent=runs[0]?comma(runs[0].gallimaufry)+' last run':'';
+  $('s-9').textContent=cl9;
+  $('s-8').textContent=cl8;
+}
+
+// ─── Render: run table ────────────────────────────────────────────────────
+function renderRunTable() {
+  const runs=filtered();
+  $('hist-ttl').textContent='Run History — '+(activeGroup==='main'?'Main group':'Baby sortie');
+  $('hist-cnt').textContent=runs.length+' runs';
+  if (!runs.length) { $('run-tbl-wrap').innerHTML='<div class="empty">No runs for this group yet.</div>'; return; }
+
+  let h=`<table class="tbl"><thead><tr><th>Date</th><th>Group</th><th>Bosses</th><th>Gallimaufry</th><th>+1</th><th>Aminon</th><th>Deaths</th><th></th></tr></thead><tbody>`;
+  runs.forEach(r => {
+    const k=r.bosses_killed||[], n=k.length, hasA=k.includes('Aminon');
+    const bb = n===9&&r.hard_mode?`<span class="bdg b9hm">9 ★</span>`:n===9?`<span class="bdg b9">9 ✓</span>`:n===8&&!hasA?`<span class="bdg b8">8 ✓</span>`:`<span class="bdg bpt">${n}/9</span>`;
+    const am = hasA?`<span class="bdg ${r.hard_mode?'bhm':'bnm'}">${r.hard_mode?'HM':'NM'}</span>`:'<span style="color:#ccc">—</span>';
+    const dt = Object.values(r.bosses||{}).reduce((s,b)=>s+(b.deaths||[]).length,0);
+    const grp= r.group==='baby'?`<span class="bdg bby">Baby</span>`:'<span style="font-size:11px;color:#ccc">Main</span>';
+    const isSel= selectedRun?.id===r.id;
+    h+=`<tr class="${isSel?'sel':''}" data-id="${r.id}">
+      <td style="font-size:12px">${r.date||''}</td>
+      <td>${grp}</td><td>${bb}</td>
+      <td class="num gold" style="font-weight:500">${comma(r.gallimaufry)}</td>
+      <td style="color:#999">${r.old_case_plus1||'—'}</td>
+      <td>${am}</td>
+      <td class="${dt?'coral':''}">` + (dt||'<span style="color:#ccc">—</span>') + `</td>
+      <td><button class="del-btn" onclick="event.stopPropagation();promptDelete('${r.id}')">✕</button></td>
+    </tr>`;
+  });
+  h+='</tbody></table>';
+  $('run-tbl-wrap').innerHTML=h;
+  $('run-tbl-wrap').querySelectorAll('tr[data-id]').forEach(tr=>{
+    tr.addEventListener('click',()=>{ const r=allRuns.find(x=>x.id===tr.dataset.id); if(r) selectRun(r); });
+  });
+}
+
+// ─── Render: run detail ───────────────────────────────────────────────────
+function selectRun(run) {
+  selectedRun=run; renderRunTable(); renderDetail(run);
+  $('detail-card').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function renderDetail(run) {
+  $('detail-card').style.display='';
+  $('d-title').textContent=run.date+(run.group==='baby'?' · Baby sortie':' · Main group');
+  $('d-meta').textContent=(run.bosses_killed||[]).length+'/9 bosses';
+
+  // Boss timeline
+  const maxDur=Math.max(...BOSSES.map(b=>run.bosses?.[b]?.fight_duration||0),1);
+  let tl=`<table class="tl"><thead><tr><th>Boss</th><th style="width:60px"></th><th>Duration</th><th>vs avg</th><th>In-zone at start</th></tr></thead><tbody>`;
+  BOSSES.forEach(b=>{
+    const bd=run.bosses?.[b]; if(!bd?.killed) return;
+    const dur=bd.fight_duration, inz=bd.inzone_at_start;
+    const avg=avgTime(filtered(),b);
+    const pct=dur!=null?Math.round(dur/maxDur*100):0;
+    const col=b==='Aminon'?GOLD:TEAL;
+    let ps='—', pc='p-avg';
+    if (dur!=null&&avg!=null) { const d=dur-avg; ps=Math.abs(d)>5?(d>0?'+':'')+d+'s':'on pace'; pc=d>5?'p-slow':d<-5?'p-fast':'p-avg'; }
+    tl+=`<tr><td style="font-weight:500;font-size:11.5px;white-space:nowrap">${b}</td><td><div class="bar"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div></td><td>${fmtDur(dur)}</td><td class="${pc}">${ps}</td><td class="inzone">${fmtDur(inz)}</td></tr>`;
+  });
+  tl+='</tbody></table>';
+
+  // Item grid builder
+  const mkGrid=(data,label)=>{
+    let g=`<div class="d-lbl" style="margin-bottom:6px">${label}</div><div class="item-grid">`;
+    LETTERS.forEach(l=>{ const it=data?.[l],got=it?.obtained,t=got&&it.inzone!=null?fmtDur(it.inzone):'—';
+      g+=`<div class="item ${got?'got':''}"><span class="item-l">${l}</span><span class="item-t">${t}</span></div>`; });
+    return g+'</div>';
+  };
+
+  // Absorb-TP
+  let atp='';
+  const aD=run.bosses?.['Aminon'];
+  if (aD?.absorb_tp && Object.keys(aD.absorb_tp).length) {
+    atp='<div class="d-lbl" style="margin-top:12px;margin-bottom:6px">Absorb-TP</div>';
+    atp+=`<table class="tl"><thead><tr><th>Player</th><th>Hits</th><th>0TP</th><th>Resist</th><th>Avg TP</th></tr></thead><tbody>`;
+    Object.entries(aD.absorb_tp).sort((a,b)=>(b[1].success||0)-(a[1].success||0))
+      .forEach(([n,d])=>{ atp+=`<tr><td style="font-weight:500">${n}</td><td>${d.success}</td><td>${d.zero_tp}</td><td>${d.resist}</td><td>${d.avg_tp||'—'}</td></tr>`; });
+    atp+='</tbody></table>';
+  }
+
+  // Tags
+  const totD=Object.values(run.bosses||{}).reduce((s,b)=>s+(b.deaths||[]).length,0);
+  let tags='<div class="d-tags">';
+  if (totD>0) tags+=`<span class="d-tag bdt">✝ ${totD} death${totD>1?'s':''}</span>`;
+  if (run.bonus?.aurum_chest)  tags+=`<span class="d-tag" style="background:#f5f2ec;color:#888;border:1px solid #e8e3d8">Aurum Chest</span>`;
+  if (run.bonus?.naakuals>0)   tags+=`<span class="d-tag" style="background:#f5f2ec;color:#888;border:1px solid #e8e3d8">${run.bonus.naakuals}× Naakual</span>`;
+  (run.bonus?.mini_nms||[]).forEach(nm=>tags+=`<span class="d-tag" style="background:#f5f2ec;color:#888;border:1px solid #e8e3d8">${nm}</span>`);
+  if (run.old_case_plus1>0)    tags+=`<span class="d-tag b9hm">+${run.old_case_plus1} Old Case</span>`;
+  if (run.note)                tags+=`<span style="font-size:11.5px;color:#999;font-style:italic">${run.note}</span>`;
+  tags+='</div>';
+
+  $('d-body').innerHTML=`<div class="detail-grid">
+    <div><div class="d-lbl">Boss timeline</div>${tl}</div>
+    <div>${mkGrid(run.shards,"Ra'Kaznar Shards")}${mkGrid(run.metals,"Ra'Kaznar Metals")}${atp}${tags}</div>
+  </div>`;
+}
+
+// ─── Render: player averages ──────────────────────────────────────────────
+function renderBossTabs() {
+  const runs=filtered();
+  $('boss-tabs').innerHTML=BOSSES.map(b=>`<button class="btab ${b===activeBoss?'on':''}" data-b="${b}">${b}</button>`).join('');
+  $('boss-tabs').querySelectorAll('.btab').forEach(bt=>{ bt.addEventListener('click',()=>{ activeBoss=bt.dataset.b; renderBossTabs(); }); });
+  const rows=playerBossAvg(runs,activeBoss);
+  if (!rows.length) { $('pavg-body').innerHTML='<div class="empty">No data for this boss yet.</div>'; return; }
+  let h=`<table class="tbl"><thead><tr><th>Player</th><th>Avg dmg %</th><th>Avg WS</th><th>Avg acc</th></tr></thead><tbody>`;
+  rows.forEach((r,i)=>{
+    const s=i===0?'style="color:var(--gold);font-weight:500"':'';
+    h+=`<tr><td ${s}>${r.name}</td><td ${s}>${r.pct!=null?r.pct.toFixed(1)+'%':'—'}</td><td>${r.ws!=null?(r.ws>=1000?Math.round(r.ws/1000)+'k':Math.round(r.ws)):'—'}</td><td>${r.acc!=null?r.acc.toFixed(1)+'%':'—'}</td></tr>`;
+  });
+  $('pavg-body').innerHTML=h+'</tbody></table>';
+}
+
+// ─── Render: boss time grid ───────────────────────────────────────────────
+function renderBossGrid() {
+  const times=bossAvgTimes(filtered());
+  $('boss-grid').innerHTML=BOSSES.map(b=>{
+    const a=times[b];
+    if (!a.length) return `<div class="bt-card"><div class="bt-name">${b}</div><div style="font-size:11px;color:#ccc">No data</div></div>`;
+    const s=[...a].sort((x,y)=>x-y), f=s[0], sl=s[s.length-1], av=Math.round(a.reduce((x,y)=>x+y,0)/a.length);
+    return `<div class="bt-card"><div class="bt-name">${b}</div><div class="bt-row">
+      <div><div class="btl">Fastest</div><div class="btv btv-f">${fmtDur(f)}</div></div>
+      <div><div class="btl">Average</div><div class="btv btv-a">${fmtDur(av)}</div></div>
+      <div><div class="btl">Slowest</div><div class="btv btv-s">${fmtDur(sl)}</div></div>
+    </div></div>`;
+  }).join('');
+}
+
+// ─── Render: galli chart ──────────────────────────────────────────────────
+function renderGalliChart() {
+  const runs=filtered().slice(0,20).reverse();
+  $('galli-meta').textContent=`Last ${runs.length} runs · ${activeGroup==='main'?'Main group':'Baby sortie'}`;
+  if (galliChart) { galliChart.destroy(); galliChart=null; }
+  if (!runs.length) return;
+  galliChart=new Chart($('galli-canvas'),{type:'line',data:{
+    labels:runs.map(r=>(r.date||'').split(' ').slice(1,3).join(' ')),
+    datasets:[{label:'Gallimaufry',data:runs.map(r=>r.gallimaufry||0),
+      borderColor:GOLD,backgroundColor:'rgba(250,206,122,0.12)',borderWidth:1.5,
+      pointRadius:2.5,pointBackgroundColor:GOLD,fill:true,tension:.35}]
+  },options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+comma(c.parsed.y)}}},
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:9.5},color:'#aaa',maxTicksLimit:10}},
+      y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9.5},color:'#aaa',callback:v=>v>=1000?Math.floor(v/1000)+'k':v},min:0}
+    }
+  }});
+}
+
+// ─── Render: attendance ───────────────────────────────────────────────────
+function renderAttendance() {
+  const runs=filtered().slice(0,8);
+  if (!runs.length) { $('att-body').innerHTML='<div class="empty">No data.</div>'; return; }
+  const members={};
+  runs.forEach(r=>(r.party||[]).forEach(p=>{ members[p.name]=(members[p.name]||0)+1; }));
+  const sorted=Object.keys(members).sort((a,b)=>members[b]-members[a]);
+  const gc=`90px repeat(${runs.length},1fr)`;
+  let h=`<div class="att-row" style="grid-template-columns:${gc};background:#faf8f4">
+    <div class="att-name" style="font-size:10px;color:#aaa">Member</div>
+    ${runs.map(r=>`<div class="att-cell" style="font-size:9.5px;color:#aaa">${(r.date||'').split(' ').slice(1,3).join(' ')}</div>`).join('')}
+  </div>`;
+  sorted.forEach(n=>{
+    const pct=Math.round(members[n]/runs.length*100);
+    h+=`<div class="att-row" style="grid-template-columns:${gc}">
+      <div class="att-name">${n} <span class="att-pct">${pct}%</span></div>
+      ${runs.map(r=>`<div class="att-cell"><span class="dot ${(r.party||[]).some(p=>p.name===n)?'dot-y':'dot-n'}"></span></div>`).join('')}
+    </div>`;
+  });
+  $('att-body').innerHTML=h;
+}
+
+// ─── Full render ──────────────────────────────────────────────────────────
+function renderAll() {
+  renderStats(); renderRunTable(); renderBossTabs(); renderBossGrid(); renderGalliChart(); renderAttendance();
+  const runs=filtered();
+  if (runs.length && !selectedRun) selectRun(runs[0]);
+  else if (selectedRun) { renderDetail(selectedRun); $('detail-card').style.display=''; }
+  else $('detail-card').style.display='none';
+}
+
+// ─── Group toggle ─────────────────────────────────────────────────────────
+function switchGroup(g) {
+  activeGroup=g; selectedRun=null;
+  $('btn-main').classList.toggle('on',g==='main');
+  $('btn-baby').classList.toggle('on',g==='baby');
+  renderAll();
+}
+
+// ─── Delete ───────────────────────────────────────────────────────────────
+function promptDelete(id) {
+  const r=allRuns.find(x=>x.id===id); if (!r) return;
+  pendingDelete=id;
+  $('del-sub').textContent=`Delete the run from ${r.date}? This cannot be undone.`;
+  $('mo-delete').classList.add('open');
+}
+function closeDelete() { pendingDelete=null; $('mo-delete').classList.remove('open'); }
+async function confirmDelete() {
+  closeDelete();
+  const newRuns=allRuns.filter(r=>r.id!==pendingDelete);
+  const ok=await githubWrite(newRuns,'Delete run '+pendingDelete);
+  if (ok) {
+    if (selectedRun?.id===pendingDelete) { selectedRun=null; $('detail-card').style.display='none'; }
+    allRuns=newRuns; renderAll(); toast('Run deleted.');
+  } else { toast('Delete failed. Check your token in Settings.', true); }
+}
+
+// ─── Import ───────────────────────────────────────────────────────────────
+function openImport()  { $('mo-import').classList.add('open'); }
+function closeImport() {
+  $('mo-import').classList.remove('open');
+  $('import-ta').value=''; $('import-preview').style.display='none';
+  $('import-ok').style.display='none'; pendingImport=null;
+}
+function previewImport() {
+  const text=$('import-ta').value.trim();
+  if (!text) { toast('Paste a report first.', true); return; }
+  const run=parseReport(text);
+  if (!run) { toast('Could not parse this report format.', true); return; }
+  pendingImport=run;
+  const party=run.party.map(p=>p.name).join(', ')||'Unknown';
+  $('import-preview').textContent=`Date:         ${run.date}\nGroup:        ${run.group}\nBosses:       ${run.bosses_killed.length}/9  (${run.bosses_killed.join(', ')||'none'})\nGallimaufry:  ${comma(run.gallimaufry)}\nOld Case +1:  ${run.old_case_plus1}\nParty:        ${party}`;
+  $('import-preview').style.display=''; $('import-ok').style.display='';
+}
+async function confirmImport() {
+  if (!pendingImport) return;
+  if (allRuns.find(r=>r.id===pendingImport.id)) { toast('A run with this date already exists.', true); return; }
+  const newRuns=[pendingImport,...allRuns].sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+  const ok=await githubWrite(newRuns,'Import run '+pendingImport.id);
+  if (ok) { allRuns=newRuns; closeImport(); renderAll(); toast('Run imported.'); }
+  else { toast('Import failed. Check your token in Settings.', true); }
+}
+
+// ─── Settings ─────────────────────────────────────────────────────────────
+function openSettings() { $('tok-inp').value=token(); $('mo-settings').classList.add('open'); }
+function closeSettings(){ $('mo-settings').classList.remove('open'); }
+function saveSettings()  { const t=$('tok-inp').value.trim(); t?localStorage.setItem('mh_token',t):localStorage.removeItem('mh_token'); closeSettings(); toast('Settings saved.'); }
+
+// Close overlays on backdrop click
+['mo-settings','mo-import','mo-delete'].forEach(id=>{
+  $(id).addEventListener('click',e=>{ if(e.target===$(id)) $(id).classList.remove('open'); });
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+async function init() {
+  $('run-tbl-wrap').innerHTML='<div class="loading">Loading runs…</div>';
+  allRuns=await fetchRuns();
+  if (allRuns[0]) $('hdr-time').textContent='Last run: '+(allRuns[0].date||'');
+  renderAll();
+}
+
+init();
+</script>
+</body>
+</html>
