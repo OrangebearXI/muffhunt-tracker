@@ -342,7 +342,17 @@ async function fetchRuns() {
     const r = await fetch(RAW_URL+'?t='+Date.now());
     if (!r.ok) return [];
     const d = await r.json();
-    return Array.isArray(d.runs) ? d.runs : [];
+    if (!Array.isArray(d.runs)) return [];
+    // Re-parse timestamps from the date string on load. Runs imported before
+    // the robust date parser was added may have a timestamp of import time
+    // rather than run time, causing incorrect sort order.
+    d.runs.forEach(r => {
+      if (r.date) {
+        const ts = parseDateToTimestamp(r.date);
+        if (ts > 0) r.timestamp = ts;
+      }
+    });
+    return d.runs.sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
   } catch { return []; }
 }
 
@@ -364,6 +374,21 @@ async function githubWrite(runs, msg) {
 }
 
 // ─── Text report parser ───────────────────────────────────────────────────
+
+// Parse Lua os.date() output into a Unix timestamp (seconds).
+// Handles "Mon May  4 21:21:47 2026" (single-digit day with leading space)
+// and "Sun May 10 16:13:42 2026" (two-digit day). Falls back to native Date
+// for any other format. Returns 0 on failure so bad dates sort to the bottom.
+function parseDateToTimestamp(str) {
+  if (!str) return 0;
+  const MONTHS = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  const m = str.match(/\w{3}\s+(\w{3})\s+(\d{1,2})\s+(\d{2}):(\d{2}):(\d{2})\s+(\d{4})/);
+  if (m && MONTHS[m[1]] !== undefined)
+    return new Date(+m[6], MONTHS[m[1]], +m[2], +m[3], +m[4], +m[5]).getTime() / 1000;
+  const d = new Date(str);
+  return isNaN(d) ? 0 : d.getTime() / 1000;
+}
+
 function parseDur(s) {
   if (!s) return null;
   // "5 min 6 sec", "0 min 27 sec", "1m6s", "27s"
@@ -393,11 +418,8 @@ function parseReport(text) {
   const dm = lines[0].match(/\[(?:MuffHunt Report|Sortie Report)\s*-\s*(.+?)(?:\]\s*\[|\])/);
   if (dm) {
     run.date = dm[1].trim();
-    const pd = new Date(run.date);
-    run.timestamp = isNaN(pd) ? Date.now()/1000 : pd.getTime()/1000;
-    run.id = new Date(run.timestamp*1000).toISOString().slice(0,19).replace(/[T:]/g,'-').replace(/-(?=\d{2}$)/,'_').replace(/T/,'_');
-    // cleaner id format YYYY-MM-DD_HH-MM-SS
-    const d = new Date(run.timestamp*1000);
+    run.timestamp = parseDateToTimestamp(run.date);
+    const d = new Date(run.timestamp * 1000);
     run.id = [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-')
            + '_' + [String(d.getHours()).padStart(2,'0'), String(d.getMinutes()).padStart(2,'0'), String(d.getSeconds()).padStart(2,'0')].join('-');
   }
