@@ -769,11 +769,12 @@ function promptDelete(id) {
 }
 function closeDelete() { pendingDelete=null; $('mo-delete').classList.remove('open'); }
 async function confirmDelete() {
+  const idToDelete = pendingDelete;
   closeDelete();
-  const newRuns=allRuns.filter(r=>r.id!==pendingDelete);
-  const ok=await githubWrite(newRuns,'Delete run '+pendingDelete);
+  const newRuns = allRuns.filter(r => r.id !== idToDelete);
+  const ok = await githubWrite(newRuns, 'Delete run ' + idToDelete);
   if (ok) {
-    if (selectedRun?.id===pendingDelete) { selectedRun=null; $('detail-card').style.display='none'; }
+    if (selectedRun?.id === idToDelete) { selectedRun=null; $('detail-card').style.display='none'; }
     allRuns=newRuns; renderAll(); toast('Run deleted.');
   } else { toast('Delete failed. Check your token in Settings.', true); }
 }
